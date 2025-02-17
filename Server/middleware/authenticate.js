@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config({ path: ".env.development" });
+}else {
+  require("dotenv").config({ path: ".env.production" });
+}
 const authenticate = async (req, res, next) => {
   if (!req.headers.authorization) {
     return res

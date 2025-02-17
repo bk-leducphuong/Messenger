@@ -4,7 +4,7 @@ const router = express.Router();
 
 const messageController = require('../controllers/messageController');
 
-// root route: /message
+// root route: /api/message
 router.get('/:chatId',authenticate,  messageController.getAllMessages);
 router.post('/', authenticate, messageController.sendMessage);
 

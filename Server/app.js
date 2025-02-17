@@ -1,29 +1,41 @@
-require("dotenv").config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config({ path: ".env.development" });
+}else {
+  require("dotenv").config({ path: ".env.production" });
+}
+
 const cors = require("cors");
 const express = require("express");
 const socket = require("socket.io");
+const sequelize = require("./config/db");
 // const { Server } = require("socket.io");
 const app = express();
-app.use(cors());
+app.use(cors(
+  {
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  }
+));
 app.use(express.json());
-const connect = require("./config/db");
 
-const userController = require("./controller/user");
-const chatController = require("./controller/chats");
-const messageController = require("./controller/messages");
-app.use("/auth", userController);
-app.use("/chat", chatController);
-app.use("/message", messageController);
+const authRoutes = require("./routes/authRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/message", messageRoutes);
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3000;
 let server = app.listen(PORT, async (req, res) => {
   try {
-    await connect();
-  } catch (err) {
-    console.log(err.message);
+    await sequelize.sync({ force: false });
+    console.log(`Server is listening on port ${PORT}`);
+  }catch(error) {
+    console.error(error);
   }
-  console.log(`Listening on ${PORT}`);
 });
+
 const io = socket(server, {
   pingTimeout: 6000,
   cors: {

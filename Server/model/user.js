@@ -1,36 +1,45 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const userSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    pic: {
-      type: "String",
-      required: true,
-      default:
-        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
-    },
-    isAdmin: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
+const { DataTypes } = require('sequelize');
+const bcrypt = require('bcrypt');
+const sequelize = require('../config/db');
+
+const User = sequelize.define('User', {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  {
-    timestaps: true,
-    versionKey: false,
-  }
-);
-userSchema.pre("save", function (next) {
-  if (!this.isModified("password")) return next();
-  const hash = bcrypt.hashSync(this.password, 8);
-  this.password = hash;
-  return next();
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  pic: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg',
+  },
+  isAdmin: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+}, {
+  timestamps: true,
+  versionKey: false,
 });
 
-userSchema.methods.checkPassword = function (password) {
+User.beforeSave(async (user, options) => {
+  if (user.changed('password')) {
+    const hash = await bcrypt.hash(user.password, 8);
+    user.password = hash;
+  }
+});
+
+User.prototype.checkPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = User;

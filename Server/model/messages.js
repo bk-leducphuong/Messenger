@@ -1,14 +1,36 @@
-const mongoose = require("mongoose");
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
 
-const messageSchema = mongoose.Schema(
-  {
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
-    content: { type: String, trim: true },
-    chat: { type: mongoose.Schema.Types.ObjectId, ref: "chat" },
-    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+const Message = sequelize.define('Message', {
+  sender: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users', // name of the target model
+      key: 'id', // key in the target model
+    }
   },
-  { timestamps: true, versionKey: false }
-);
+  content: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    trim: true
+  },
+  chat: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'chats', // name of the target model
+      key: 'id', // key in the target model
+    }
+  },
+  readBy: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users', // name of the target model
+      key: 'id', // key in the target model
+    }
+  }
+}, {
+  timestamps: true,
+  versionKey: false
+});
 
-const Message = mongoose.model("message", messageSchema);
 module.exports = Message;
