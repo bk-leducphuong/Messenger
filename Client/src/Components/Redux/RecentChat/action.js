@@ -16,7 +16,7 @@ export const newCreatedChat = (payload) => ({
 
 export const makeRecentChatApi = (token) => async (dispatch) => {
   recentLoding(true);
-  const url = `https://messanger-br6c.onrender.com/chat`;
+  const url = import.meta.env.VITE_API_URL + "/chat";
   try {
     let res = await fetch(url, {
       method: "get",
@@ -35,7 +35,7 @@ export const makeRecentChatApi = (token) => async (dispatch) => {
 
 export const makeNewGroup = (group_data, token) => async (dispatch) => {
   recentLoding(true);
-  const url = `https://messanger-br6c.onrender.com/chat/group`;
+  const url = process.env.API_URL + "/chat/group";
   try {
     let res = await fetch(url, {
       method: "post",
@@ -55,7 +55,7 @@ export const makeNewGroup = (group_data, token) => async (dispatch) => {
 
 export const accessChat = (userId, token, recentchat) => async (dispatch) => {
   dispatch(recentLoding(true));
-  const url = `https://messanger-br6c.onrender.com/chat`;
+  const url = process.env.API_URL + "/chat";
   try {
     let res = await fetch(url, {
       method: "post",

@@ -26,7 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 let server = app.listen(PORT, async (req, res) => {
   try {
     await sequelize.sync({ force: false });
@@ -40,7 +40,7 @@ const io = socket(server, {
   pingTimeout: 6000,
   cors: {
     "Access-Control-Allow-Origin": "*",
-    origin: "https://messanger-beryl.vercel.app",
+    origin: process.env.CLIENT_URL,
     // credentials: true,
   },
 });

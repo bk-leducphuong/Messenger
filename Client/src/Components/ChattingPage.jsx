@@ -12,9 +12,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCurrentMessages, sendMessageApi } from "./Redux/Chatting/action";
 import { sendMessage } from "./Redux/Chatting/action";
 import { addUnseenmsg } from "./Redux/Notification/action";
-
 import io from "socket.io-client";
-const SERVER_POINT = "https://messanger-br6c.onrender.com";
+
+const SERVER_POINT = import.meta.env.VITE_API_URL;
 var socket, currentChattingWith;
 
 export const ChattingPage = () => {

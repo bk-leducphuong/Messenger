@@ -21,7 +21,7 @@ export const LoginComp = () => {
   };
 
   const handleSubmit = () => {
-    const url = "https://messanger-br6c.onrender.com/auth/login";
+    const url = import.meta.env.VITE_API_URL + "/auth/login";
     dispatch(authRegister(url, regData));
   };
   if (user._id) {
