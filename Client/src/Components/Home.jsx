@@ -9,7 +9,7 @@ export const HomeComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
   const { chatting } = useSelector((store) => store.chatting);
 
-  if (!user._id) {
+  if (!user.id) {
     return <Navigate to="/login" />;
   }
 
@@ -17,7 +17,7 @@ export const HomeComp = () => {
     <div className="home-cont">
       <SideNavbar />
       <MyChat />
-      {chatting._id ? <ChattingPage /> : <MessageStarter {...user} />}
+      {chatting.id ? <ChattingPage /> : <MessageStarter {...user} />}
     </div>
   );
 };

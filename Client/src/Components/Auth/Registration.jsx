@@ -32,11 +32,10 @@ export const RegisterComp = () => {
     reader.readAsDataURL(file);
   };
   const handleSubmit = () => {
-    const url = import.meta.env.VITE_API_URL + "/auth/register";
     if (user.pic) regData["pic"] = user.pic;
-    dispatch(authRegister(url, regData));
+    dispatch(authRegister(regData));
   };
-  if (user._id) {
+  if (user.id) {
     return <Navigate to={"/"} />;
   }
   return (

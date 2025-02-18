@@ -7,24 +7,23 @@ import Stack from "@mui/material/Stack";
 import { Link, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useDispatch, useSelector } from "react-redux";
-import { authRegister } from "../Redux/Auth/action";
+import { authLogin } from "../Redux/Auth/action";
 export const LoginComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
-  const [regData, setRegData] = useState({
+  const [loginData, setLoginData] = useState({
     email: "albert@gmail.com",
     password: "albert",
   });
   const dispatch = useDispatch();
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setRegData({ ...regData, [name]: value });
+    setLoginData({ ...loginData, [name]: value });
   };
 
   const handleSubmit = () => {
-    const url = import.meta.env.VITE_API_URL + "/auth/login";
-    dispatch(authRegister(url, regData));
+    dispatch(authLogin(loginData));
   };
-  if (user._id) {
+  if (user.id) {
     return <Navigate to={"/"} />;
   }
   return (

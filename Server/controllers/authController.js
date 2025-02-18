@@ -8,20 +8,32 @@ if (process.env.NODE_ENV !== "production") {
 
 exports.login = async (req, res) => {
   try {
-    let user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(400).send("emai not exist");
-    let match = user.checkPassword(req.body.password);
-    if (!match) return res.status(400).send("password is wrong");
-    let token = jwt.sign({ user }, process.env.JWT_SECRET_KEY);
+    const {email, password} = req.body
+    let queryResult = await User.findOne({
+      where: {
+        email: email,
+        password: password
+      }
+    });
+
+    let user = queryResult.dataValues;
+    if (!user) return res.status(400).send("Email or password is wrong");
+    // let match = user.checkPassword(req.body.password);
+    // if (!match) return res.status(400).send("password is wrong");
+    let token = jwt.sign({ user }, process.env.JWT_SECRET);
     return res.status(200).send({ user, token });
   } catch (err) {
+    console.error(err);
     return res.status(500).send(err.message);
   }
 };
 
 exports.register = async (req, res) => {
   try {
-    let user = await User.create(req.body);
+    let existUser = await User.findOne({email: req.body.email});
+    if (existUser) return res.status(400).send("email already exist");
+    let queryResult = await User.create(req.body);
+    let user = queryResult.dataValues;
     let token = jwt.sign({ user }, process.env.JWT_SECRET_KEY);
     return res.status(200).send({ user, token });
   } catch (err) {

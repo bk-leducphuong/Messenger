@@ -10,10 +10,30 @@ export const authLoading = (payload) => ({ type: AUTH_LOADING, payload });
 export const authError = (payload) => ({ type: AUTH_ERROR, payload });
 export const authLogout = () => ({ type: LOGOUT, payload: {} });
 
-export const authRegister = (url, user) => async (dispatch) => {
+export const authRegister = (user) => async (dispatch) => {
   dispatch(authLoading(true));
   try {
-    let res = await fetch(url, {
+    let res = await fetch(import.meta.env.VITE_API_URL + "/auth/register", {
+      method: "POST",
+      body: JSON.stringify(user),
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+    let data = await res.json();
+    localStorage.setItem("userInfo", JSON.stringify(data));
+    dispatch(authUser(data));
+  } catch (err) {
+    dispatch(authLoading(false));
+    dispatch(authError(true));
+    console.log(err.message);
+  }
+};
+
+export const authLogin = (user) => async (dispatch) => {
+  dispatch(authLoading(true));
+  try {
+    let res = await fetch(import.meta.env.VITE_API_URL + "/auth/login", {
       method: "POST",
       body: JSON.stringify(user),
       headers: {
