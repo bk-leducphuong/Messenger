@@ -2,19 +2,24 @@ const Chat = require("../model/chat");
 const User = require("../model/user");
 
 exports.getAllChats = async (req, res) => {
-    try {
+  try {
+    console.log(req.body);
     let chats = await Chat.findAll({
       where: {
         users: {
-          [Sequelize.Op.contains]: [req.user.id]
-        }
+          [Sequelize.Op.contains]: [req.user.id],
+        },
       },
       include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: User, as: 'groupAdmin', attributes: { exclude: ['password'] } },
-        { model: Message, as: 'latestMessage' }
+        { model: User, attributes: { exclude: ["password"] } },
+        {
+          model: User,
+          as: "groupAdmin",
+          attributes: { exclude: ["password"] },
+        },
+        { model: Message, as: "latestMessage" },
       ],
-      order: [['updatedAt', 'DESC']]
+      order: [["updatedAt", "DESC"]],
     });
 
     res.status(200).send(chats);
@@ -23,19 +28,19 @@ exports.getAllChats = async (req, res) => {
   }
 };
 exports.createChat = async (req, res) => {
-    try {
+  try {
     const { userId } = req.body;
     let chat = await Chat.findOne({
       where: {
         isGroupChat: false,
         users: {
-          [Sequelize.Op.contains]: [req.user.id, userId]
-        }
+          [Sequelize.Op.contains]: [req.user.id, userId],
+        },
       },
       include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: Message, as: 'latestMessage' }
-      ]
+        { model: User, attributes: { exclude: ["password"] } },
+        { model: Message, as: "latestMessage" },
+      ],
     });
     if (chat) {
       return res.status(200).send(chat);
@@ -43,15 +48,13 @@ exports.createChat = async (req, res) => {
       const chatData = {
         chatName: "sender",
         isGroupChat: false,
-        users: [req.user.id, userId]
+        users: [req.user.id, userId],
       };
 
       const createdChat = await Chat.create(chatData);
       const fullChat = await Chat.findOne({
         where: { id: createdChat.id },
-        include: [
-          { model: User, attributes: { exclude: ['password'] } }
-        ]
+        include: [{ model: User, attributes: { exclude: ["password"] } }],
       });
 
       return res.status(200).send(fullChat);
@@ -61,7 +64,7 @@ exports.createChat = async (req, res) => {
   }
 };
 exports.createGroupChat = async (req, res) => {
-    try {
+  try {
     let users = req.body.users;
     users.push(req.user.id);
 
@@ -69,15 +72,19 @@ exports.createGroupChat = async (req, res) => {
       chatName: req.body.name,
       users: users,
       isGroupChat: true,
-      groupAdmin: req.user.id
+      groupAdmin: req.user.id,
     });
 
     const createdGroupDetails = await Chat.findOne({
       where: { id: groupChat.id },
       include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: User, as: 'groupAdmin', attributes: { exclude: ['password'] } }
-      ]
+        { model: User, attributes: { exclude: ["password"] } },
+        {
+          model: User,
+          as: "groupAdmin",
+          attributes: { exclude: ["password"] },
+        },
+      ],
     });
 
     return res.status(200).send(createdGroupDetails);
@@ -86,7 +93,7 @@ exports.createGroupChat = async (req, res) => {
   }
 };
 exports.renameGroupChat = async (req, res) => {
-    try {
+  try {
     const { chatId, chatName } = req.body;
 
     const updatedChat = await Chat.update(
@@ -104,7 +111,7 @@ exports.renameGroupChat = async (req, res) => {
   }
 };
 exports.removeMemberFromGroupChat = async (req, res) => {
-    try {
+  try {
     const { chatId, userId } = req.body;
 
     const chat = await Chat.findOne({ where: { id: chatId } });
@@ -112,15 +119,19 @@ exports.removeMemberFromGroupChat = async (req, res) => {
       return res.status(404).send("Chat Not Found");
     }
 
-    chat.users = chat.users.filter(user => user !== userId);
+    chat.users = chat.users.filter((user) => user !== userId);
     await chat.save();
 
     const updatedChat = await Chat.findOne({
       where: { id: chatId },
       include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: User, as: 'groupAdmin', attributes: { exclude: ['password'] } }
-      ]
+        { model: User, attributes: { exclude: ["password"] } },
+        {
+          model: User,
+          as: "groupAdmin",
+          attributes: { exclude: ["password"] },
+        },
+      ],
     });
 
     res.json(updatedChat);
@@ -129,7 +140,7 @@ exports.removeMemberFromGroupChat = async (req, res) => {
   }
 };
 exports.addMemberToGroupChat = async (req, res) => {
-    try {
+  try {
     const { chatId, userId } = req.body;
 
     const chat = await Chat.findOne({ where: { id: chatId } });
@@ -143,9 +154,13 @@ exports.addMemberToGroupChat = async (req, res) => {
     const updatedChat = await Chat.findOne({
       where: { id: chatId },
       include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: User, as: 'groupAdmin', attributes: { exclude: ['password'] } }
-      ]
+        { model: User, attributes: { exclude: ["password"] } },
+        {
+          model: User,
+          as: "groupAdmin",
+          attributes: { exclude: ["password"] },
+        },
+      ],
     });
 
     res.json(updatedChat);

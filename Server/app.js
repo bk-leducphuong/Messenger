@@ -6,6 +6,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const cors = require("cors");
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const socket = require("socket.io");
 const sequelize = require("./config/db");
 // const { Server } = require("socket.io");
@@ -13,11 +14,13 @@ const app = express();
 app.use(cors(
   {
     origin: process.env.CLIENT_URL,
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   }
 ));
 app.use(express.json());
+app.use(cookieParser());
 
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");

@@ -26,20 +26,13 @@ const User = sequelize.define('user', {
     allowNull: false,
     defaultValue: false,
   },
+  refreshToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
   versionKey: false,
 });
-
-User.beforeSave(async (user, options) => {
-  if (user.changed('password')) {
-    const hash = await bcrypt.hash(user.password, 8);
-    user.password = hash;
-  }
-});
-
-User.prototype.checkPassword = function (password) {
-  return bcrypt.compareSync(password, this.password);
-};
 
 module.exports = User;

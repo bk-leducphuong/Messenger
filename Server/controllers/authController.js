@@ -1,27 +1,60 @@
 const User = require("../model/user");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config({ path: ".env.development" });
-}else {
+} else {
   require("dotenv").config({ path: ".env.production" });
 }
 
 exports.login = async (req, res) => {
   try {
-    const {email, password} = req.body
+    const { email, password } = req.body;
     let queryResult = await User.findOne({
       where: {
         email: email,
-        password: password
-      }
+      },
     });
 
     let user = queryResult.dataValues;
-    if (!user) return res.status(400).send("Email or password is wrong");
-    // let match = user.checkPassword(req.body.password);
-    // if (!match) return res.status(400).send("password is wrong");
-    let token = jwt.sign({ user }, process.env.JWT_SECRET);
-    return res.status(200).send({ user, token });
+    if (!user) {
+      return res.status(400).send({ message: "Email is wrong or not exist" });
+    }
+
+    // const validPass = await bcrypt.compare(password, user.password);
+    // // if password is wrong
+    // if (!validPass) {
+    //   return res.status(400).send({ message: "Password is wrong" });
+    // }
+
+    // create access token and refresh token
+    const Atoken = jwt.sign(
+      { id: user.id, name: user.name, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+
+    res.cookie("access_token", Atoken, {
+      httpOnly: true, // Allow client-side JS to read
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    const Rtoken = jwt.sign(
+      { id: user.id, name: user.name, email: user.email },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    );
+
+    res.cookie("refresh_token", Rtoken, {
+      httpOnly: true, // Allow client-side JS to read
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    await User.update({ refreshToken: Rtoken }, { where: { id: user.id } });
+
+    return res.status(200).send({ user });
   } catch (err) {
     console.error(err);
     return res.status(500).send(err.message);
@@ -30,12 +63,22 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    let existUser = await User.findOne({email: req.body.email});
-    if (existUser) return res.status(400).send("email already exist");
-    let queryResult = await User.create(req.body);
+    const { name, email, password } = req.body;
+    let existUser = await User.findOne({ email: email });
+    if (existUser)
+      return res.status(400).send({ message: "Email already exist" });
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    let queryResult = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
     let user = queryResult.dataValues;
-    let token = jwt.sign({ user }, process.env.JWT_SECRET_KEY);
-    return res.status(200).send({ user, token });
+    return res.status(200).send({ user });
   } catch (err) {
     console.log(err.message);
     return res.status(500).send(err.message);
@@ -56,14 +99,14 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(404).send('User not found');
+    if (!user) return res.status(404).send("User not found");
     if (!user.checkPassword(req.body.password))
-      return res.status(400).send('Incorrect password');
+      return res.status(400).send("Incorrect password");
     const hash = await bcrypt.hash(req.body.newPassword, 8);
     user.password = hash;
     await user.save();
-    return res.status(200).send('Password reset successfully');
-  }catch(error) {
+    return res.status(200).send("Password reset successfully");
+  } catch (error) {
     return res.status(400).send(error.message);
   }
 };
@@ -71,14 +114,13 @@ exports.resetPassword = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     const token = req.cookies.token;
-    if (!token) return res.status(401).send('Unauthorized');
+    if (!token) return res.status(401).send("Unauthorized");
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) return res.status(401).send('Unauthorized');
+      if (err) return res.status(401).send("Unauthorized");
       req.user = decoded;
-      return res.status(200).send('Logged out successfully');
+      return res.status(200).send("Logged out successfully");
     });
-  }catch(error) {
+  } catch (error) {
     return res.status(400).send(error.message);
   }
 };
-
