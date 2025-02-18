@@ -19,6 +19,7 @@ export const authRegister = (user) => async (dispatch) => {
       headers: {
         "content-type": "application/json",
       },
+      credentials: "include",
     });
     let data = await res.json();
     localStorage.setItem("userInfo", JSON.stringify(data));
@@ -39,6 +40,7 @@ export const authLogin = (user) => async (dispatch) => {
       headers: {
         "content-type": "application/json",
       },
+      credentials: "include",
     });
     let data = await res.json();
     localStorage.setItem("userInfo", JSON.stringify(data));

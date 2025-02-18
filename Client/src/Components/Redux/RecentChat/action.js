@@ -14,7 +14,7 @@ export const newCreatedChat = (payload) => ({
   payload,
 });
 
-export const makeRecentChatApi = (token) => async (dispatch) => {
+export const makeRecentChatApi = () => async (dispatch) => {
   recentLoding(true);
   const url = import.meta.env.VITE_API_URL + "/chat";
   try {
@@ -22,8 +22,8 @@ export const makeRecentChatApi = (token) => async (dispatch) => {
       method: "get",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     let data = await res.json();
     dispatch(recentChatResult(data));
@@ -33,7 +33,7 @@ export const makeRecentChatApi = (token) => async (dispatch) => {
   }
 };
 
-export const makeNewGroup = (group_data, token) => async (dispatch) => {
+export const makeNewGroup = (group_data) => async (dispatch) => {
   recentLoding(true);
   const url = process.env.API_URL + "/chat/group";
   try {
@@ -42,8 +42,8 @@ export const makeNewGroup = (group_data, token) => async (dispatch) => {
       body: JSON.stringify(group_data),
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     let data = await res.json();
     dispatch(newCreatedChat(data));
@@ -53,7 +53,7 @@ export const makeNewGroup = (group_data, token) => async (dispatch) => {
   }
 };
 
-export const accessChat = (userId, token, recentchat) => async (dispatch) => {
+export const accessChat = (userId, recentchat) => async (dispatch) => {
   dispatch(recentLoding(true));
   const url = process.env.API_URL + "/chat";
   try {
@@ -62,8 +62,8 @@ export const accessChat = (userId, token, recentchat) => async (dispatch) => {
       body: JSON.stringify({ userId }),
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     let data = await res.json();
     console.log(data);

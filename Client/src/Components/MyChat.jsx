@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { accessChat, makeRecentChatApi } from "./Redux/RecentChat/action";
 import { selectChat } from "./Redux/Chatting/action";
 import { removeSeenMsg } from "./Redux/Notification/action";
+
 export const MyChat = () => {
   const [search, setSearch] = useState(false);
   const { search_result, loading, error } = useSelector(
@@ -23,10 +24,12 @@ export const MyChat = () => {
   const { notification, unseenmsg } = useSelector(
     (store) => store.notification
   );
+
   const dispatch = useDispatch();
   useEffect(() => {
-    if (token) dispatch(makeRecentChatApi(token));
+    dispatch(makeRecentChatApi());
   }, [user]);
+
   const ref = useRef();
   const handleQuery = (e) => {
     let id;
