@@ -1,5 +1,5 @@
-import "./auth.css";
-import avatar from "./profileimg.png";
+import "../assets/styles/login/auth.css";
+import avatar from "../assets/images/profileimg.png";
 import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -7,7 +7,8 @@ import Stack from "@mui/material/Stack";
 import { Link, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useDispatch, useSelector } from "react-redux";
-import { authLogin } from "../Redux/Auth/action";
+import { authLogin } from "../redux/auth/action";
+
 export const LoginComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
   const [loginData, setLoginData] = useState({

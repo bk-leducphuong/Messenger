@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
-import { LoginComp } from "./Auth/Login";
-import { RegisterComp } from "./Auth/Registration";
-import { HomeComp } from "./Home";
+import { LoginComp } from "../pages/Login";
+import { RegisterComp } from "../pages/Register";
+import { HomeComp } from "../pages/Home";
 
 export const AllRoutes = () => {
   return (

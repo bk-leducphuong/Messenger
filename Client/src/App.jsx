@@ -1,6 +1,6 @@
 import { useState } from "react";
-import "./App.css";
-import { AllRoutes } from "./Components/AllRoutes";
+import "../src/assets/styles/app/App.css";
+import { AllRoutes } from "./routes/AllRoutes";
 
 function App() {
   const [count, setCount] = useState(0);

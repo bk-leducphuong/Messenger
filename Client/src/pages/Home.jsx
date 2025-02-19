@@ -1,9 +1,9 @@
 import { Avatar } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ChattingPage } from "./ChattingPage";
-import { MyChat } from "./MyChat";
-import SideNavbar from "./SideNavbar";
+// import { ChattingPage } from "../components/ChattingPage";
+import { MyChat } from "./Chat";
+import {SideNavbar} from "../components/SideNavbar";
 
 export const HomeComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);

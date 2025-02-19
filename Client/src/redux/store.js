@@ -1,9 +1,9 @@
 import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
-import { authReducer } from "./Auth/reducer";
-import { chattingReducer } from "./Chatting/Reducer";
-import { notyficationReducer } from "./Notification/reducer";
-import { recentChatReducer } from "./RecentChat/reducer";
-import { serachReducer } from "./Searching/reducer";
+import { authReducer } from "./auth/reducer";
+import { chattingReducer } from "./chatting/reducer";
+import { notyficationReducer } from "./notification/reducer";
+import { recentChatReducer } from "./recentChat/reducer";
+import { searchReducer } from "./searching/reducer";
 
 const loggerMiddleware = (store) => (next) => (action) => {
   if (typeof action === "function") {
@@ -15,7 +15,7 @@ const loggerMiddleware = (store) => (next) => (action) => {
 export const store = configureStore({
   reducer: {
     user: authReducer,
-    search: serachReducer,
+    search: searchReducer,
     recentChat: recentChatReducer,
     chatting: chattingReducer,
     notification: notyficationReducer,

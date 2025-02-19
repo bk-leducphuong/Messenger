@@ -1,12 +1,13 @@
-import "./auth.css";
-import avatar from "./profileimg.png";
+import "../assets/styles/register/auth.css";
+import avatar from "../assets/images/profileimg.png";
 import React, { useEffect, useState } from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import { Link, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useDispatch, useSelector } from "react-redux";
-import { authRegister, uploadPic } from "../Redux/Auth/action";
+import { authRegister, uploadPic } from "../redux/auth/action";
+
 export const RegisterComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
   const [regData, setRegData] = useState({

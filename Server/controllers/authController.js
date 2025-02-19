@@ -11,6 +11,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     let queryResult = await User.findOne({
+      attributes: ['id', 'name', 'email'],
       where: {
         email: email,
       },

@@ -1,29 +1,22 @@
 const Chat = require("../model/chat");
 const User = require("../model/user");
+const Message = require("../model/messages");
+const { Op } = require("sequelize");
 
 exports.getAllChats = async (req, res) => {
   try {
-    console.log(req.body);
     let chats = await Chat.findAll({
       where: {
         users: {
-          [Sequelize.Op.contains]: [req.user.id],
+          [Op.contains]: [req.user.id], // This checks if the array contains the value 3
         },
       },
-      include: [
-        { model: User, attributes: { exclude: ["password"] } },
-        {
-          model: User,
-          as: "groupAdmin",
-          attributes: { exclude: ["password"] },
-        },
-        { model: Message, as: "latestMessage" },
-      ],
-      order: [["updatedAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).send(chats);
   } catch (error) {
+    console.error(error.message);
     return res.status(400).send(error.message);
   }
 };
@@ -34,7 +27,7 @@ exports.createChat = async (req, res) => {
       where: {
         isGroupChat: false,
         users: {
-          [Sequelize.Op.contains]: [req.user.id, userId],
+          [Op.any]: [req.user.id, userId],
         },
       },
       include: [

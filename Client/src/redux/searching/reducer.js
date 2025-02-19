@@ -5,7 +5,7 @@ const initState = {
   loading: false,
   error: false,
 };
-export const serachReducer = (store = initState, { type, payload }) => {
+export const searchReducer = (store = initState, { type, payload }) => {
   switch (type) {
     case SEARCH_RESULT:
       return {

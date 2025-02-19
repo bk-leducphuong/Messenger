@@ -3,7 +3,7 @@ export const RECENT_ERROR = "RECENT_ERROR";
 export const ADD_RECENT_CHAT = "ADD_RECENT_CHAT";
 export const NEW_CREATED_CHAT = "NEW_CREATED_CHAT";
 import { selectChat } from "../Chatting/action";
-export const recentLoding = (payload) => ({ type: RECENT_LOADING, payload });
+export const recentLoading = (payload) => ({ type: RECENT_LOADING, payload });
 export const recentError = (payload) => ({ type: RECENT_ERROR, payload });
 export const recentChatResult = (payload) => ({
   type: ADD_RECENT_CHAT,
@@ -15,11 +15,11 @@ export const newCreatedChat = (payload) => ({
 });
 
 export const makeRecentChatApi = () => async (dispatch) => {
-  recentLoding(true);
+  dispatch(recentLoading(true));
   const url = import.meta.env.VITE_API_URL + "/chat";
   try {
     let res = await fetch(url, {
-      method: "get",
+      method: "GET",
       headers: {
         "content-type": "application/json",
       },
@@ -34,7 +34,7 @@ export const makeRecentChatApi = () => async (dispatch) => {
 };
 
 export const makeNewGroup = (group_data) => async (dispatch) => {
-  recentLoding(true);
+  dispatch(recentLoading(true));
   const url = process.env.API_URL + "/chat/group";
   try {
     let res = await fetch(url, {
@@ -54,7 +54,7 @@ export const makeNewGroup = (group_data) => async (dispatch) => {
 };
 
 export const accessChat = (userId, recentchat) => async (dispatch) => {
-  dispatch(recentLoding(true));
+  dispatch(recentLoading(true));
   const url = process.env.API_URL + "/chat";
   try {
     let res = await fetch(url, {
@@ -80,7 +80,7 @@ export const accessChat = (userId, recentchat) => async (dispatch) => {
       );
       return;
     }
-    dispatch(recentLoding(false));
+    dispatch(recentLoading(false));
     dispatch(
       selectChat({
         isGroupChat: data.isGroupChat,
