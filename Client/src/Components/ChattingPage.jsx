@@ -9,9 +9,9 @@ import InputEmoji from "react-input-emoji";
 import React, { createRef, useCallback, useEffect, useState } from "react";
 import { ChatlogicStyling, isSameSender } from "./ChatstyleLogic";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCurrentMessages, sendMessageApi } from "./Redux/Chatting/action";
-import { sendMessage } from "./Redux/Chatting/action";
-import { addUnseenmsg } from "./Redux/Notification/action";
+import { fetchCurrentMessages, sendMessageApi } from "../redux/chatting/action";
+import { sendMessage } from "../redux/chatting/action";
+import { addUnseenmsg } from "../redux/notification/action";
 import io from "socket.io-client";
 
 const SERVER_POINT = import.meta.env.VITE_API_URL;
