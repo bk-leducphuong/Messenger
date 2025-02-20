@@ -1,4 +1,4 @@
-const {Message} = require('../model/message');
+import Message from '../model/message.js';
 
 export const sendMessage = (req, res) => {
 

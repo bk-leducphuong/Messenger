@@ -1,5 +1,7 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../config/db.js";
+import User from "./user.js";
+import Conversation from "./conversation.js";
 
 const Message = sequelize.define(
   "message",
@@ -61,4 +63,4 @@ const Message = sequelize.define(
   }
 );
 
-module.exports = Message;
+export default Message;

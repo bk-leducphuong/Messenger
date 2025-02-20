@@ -1,7 +1,6 @@
-const {User } = require("../model");
+import User from "../model/user.js";
 
-
-const getUserInfo = async (req, res) => {
+export const getUserInfo = async (req, res) => {
   const user = await User.findByPk(req.params.id);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
@@ -9,7 +8,7 @@ const getUserInfo = async (req, res) => {
   return res.status(200).json(user);
 };
 
-const updateUserInfo = async (req, res) => {
+export const updateUserInfo = async (req, res) => {
   const { id } = req.params;
   const { name, email } = req.body;
 
@@ -25,7 +24,3 @@ const updateUserInfo = async (req, res) => {
   return res.status(200).json(user);
 };
 
-module.exports = {
-  getUserInfo,
-  updateUserInfo,
-};

@@ -1,9 +1,10 @@
-const jwt = require("jsonwebtoken");
-const User = require("../model/user");
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import User from "../model/user.js";
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config({ path: ".env.development" });
+  dotenv.config({ path: ".env.development" });
 } else {
-  require("dotenv").config({ path: ".env.production" });
+  dotenv.config({ path: ".env.production" });
 }
 
 
@@ -85,4 +86,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = authenticate;
+export default authenticate;

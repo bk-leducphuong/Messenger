@@ -1,5 +1,7 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
+import { DataTypes, Model } from "sequelize";
+import sequelize from '../config/db.js';
+import Conversation from "./conversation.js";
+import User from "./user.js";
 
 const ConversationParticipant = sequelize.define(
   "conversation_participant",
@@ -42,4 +44,4 @@ const ConversationParticipant = sequelize.define(
   }
 );
 
-module.exports = ConversationParticipant;
+export default ConversationParticipant;

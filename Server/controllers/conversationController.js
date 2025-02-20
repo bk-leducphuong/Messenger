@@ -1,5 +1,6 @@
-const {Conversation} = require('../model/conversation');
-const {ConversationParticipant} = require('../model/conversationParticipant');
+import ConversationParticipant from '../model/conversationParticipant.js';
+import Conversation from '../model/conversation.js';
+import User from '../model/user.js';
 
 export const createNewConversation = async (req, res) => {
   const { conversation_name, conversation_type } = req.body;
@@ -11,16 +12,42 @@ export const createNewConversation = async (req, res) => {
 };
 
 export const getAllConversation = async (req, res) => {
-  const conversations = await Conversation.findAll({
-    include: [
-      {
-        model: User,
-        as: "participants",
-        attributes: ["user_id", "username", "avatar_url"],
-      },
-    ],
-  });
-  return res.status(200).json(conversations);
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    let allConversations = [];
+    
+    // get all conversation id where user is participant
+    const conversationParticipant = await ConversationParticipant.findAll({
+      where: { user_id: req.user.user_id },
+    });
+
+    for (let i = 0; i < conversationParticipant.length; i++) {
+      const conversation = await Conversation.findByPk(
+        conversationParticipant[i].conversation_id
+      );
+      const participants = await ConversationParticipant.findAll({
+        where: { conversation_id: conversationParticipant[i].conversation_id },
+      });
+      const latestMessage = await Message.findOne({
+        where: { conversation_id: conversationParticipant[i].conversation_id },
+        order: [["created_at", "DESC"]],
+      });
+      allConversations.push({
+        conversation_id: conversation.conversation_id,
+        conversation_name: conversation.conversation_name,
+        conversation_type: conversation.conversation_type,
+        participants: participants,
+        latest_message: latestMessage,
+        latest_message_created_at: latestMessage.created_at,
+      });
+    }
+    return res.status(200).json(allConversations);
+  }catch(error) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
 };
 
 export const getConversationDetails = async (req, res) => {

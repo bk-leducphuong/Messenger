@@ -1,5 +1,5 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
+import { Model, DataTypes } from "sequelize";
+import sequelize from "../config/db.js";
 
 const MessageReaction = sequelize.define(
   "message_reaction",
@@ -36,4 +36,4 @@ const MessageReaction = sequelize.define(
   }
 );
 
-module.exports = MessageReaction;
+export default MessageReaction;

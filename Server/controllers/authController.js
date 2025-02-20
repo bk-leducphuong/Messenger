@@ -1,13 +1,14 @@
-const User = require("../model/user");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+import dotenv from "dotenv";
+import User from "../model/user.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config({ path: ".env.development" });
+  dotenv.config({ path: ".env.development" });
 } else {
-  require("dotenv").config({ path: ".env.production" });
+  dotenv.config({ path: ".env.production" });
 }
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     let queryResult = await User.findOne({
@@ -62,7 +63,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     let existUser = await User.findOne({ email: email });
@@ -86,7 +87,7 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(400).send("emai not exist");
@@ -97,7 +98,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-exports.resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(404).send("User not found");
@@ -112,7 +113,7 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-exports.logout = async (req, res) => {
+export const logout = async (req, res) => {
   try {
     const token = req.cookies.token;
     if (!token) return res.status(401).send("Unauthorized");
