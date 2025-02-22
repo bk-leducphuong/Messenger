@@ -1,6 +1,8 @@
 import ConversationParticipant from '../model/conversationParticipant.js';
 import Conversation from '../model/conversation.js';
+import Message from '../model/message.js';
 import User from '../model/user.js';
+import { Op } from 'sequelize';
 
 export const createNewConversation = async (req, res) => {
   const { conversation_name, conversation_type } = req.body;
@@ -21,6 +23,7 @@ export const getAllConversation = async (req, res) => {
     
     // get all conversation id where user is participant
     const conversationParticipant = await ConversationParticipant.findAll({
+      attributes: ["conversation_id"],
       where: { user_id: req.user.user_id },
     });
 
@@ -29,23 +32,25 @@ export const getAllConversation = async (req, res) => {
         conversationParticipant[i].conversation_id
       );
       const participants = await ConversationParticipant.findAll({
-        where: { conversation_id: conversationParticipant[i].conversation_id },
+        attributes: ["user_id"],
+        where: { conversation_id: conversationParticipant[i].conversation_id, user_id: { [Op.ne]: req.user.user_id } },
       });
       const latestMessage = await Message.findOne({
+        attributes: ["message_id", "message_text", "message_type", "sender_id", "created_at", "updated_at"],
         where: { conversation_id: conversationParticipant[i].conversation_id },
         order: [["created_at", "DESC"]],
       });
       allConversations.push({
         conversation_id: conversation.conversation_id,
         conversation_name: conversation.conversation_name,
-        conversation_type: conversation.conversation_type,
+        conversation_type: conversation.conversation_type, // 'group' or 'direct'
         participants: participants,
         latest_message: latestMessage,
-        latest_message_created_at: latestMessage.created_at,
       });
     }
     return res.status(200).json(allConversations);
   }catch(error) {
+    console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };

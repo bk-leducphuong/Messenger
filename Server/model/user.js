@@ -47,6 +47,10 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    refresh_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    }
   },
   {
     timestamps: false,

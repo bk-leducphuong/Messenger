@@ -1,5 +1,6 @@
 import {Sequelize} from 'sequelize';
 import dotenv from 'dotenv';
+import logger from './logger.js';
 if (process.env.NODE_ENV !== "production") {
   dotenv.config({ path: ".env.development" });
 }else {
@@ -11,6 +12,7 @@ const sequelize = new Sequelize(process.env.PG_DATABASE, process.env.PG_USER, pr
   dialect: 'postgres',
   port: process.env.PG_PORT,
   password: process.env.PG_PASSWORD,
+  logging: (msg) => logger.info(msg)
 });
 
 sequelize.authenticate()

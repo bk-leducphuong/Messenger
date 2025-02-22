@@ -45,8 +45,9 @@ const authenticate = async (req, res, next) => {
 
               // Check if the refresh token is in the database
               const queryResult = await User.findOne({
+                atrributes: ["refresh_token"],
                 where: {
-                  id: user.id,
+                  user_id: user.user_id,
                   email: user.email,
                 },
               });
@@ -60,7 +61,7 @@ const authenticate = async (req, res, next) => {
 
               // Generate a new access token
               const Atoken = jwt.sign(
-                { id: user.id, name: user.name, email: user.email },
+                { user_id: user.user_id, username: user.username, email: user.email },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
               );

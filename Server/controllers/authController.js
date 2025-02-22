@@ -11,14 +11,13 @@ if (process.env.NODE_ENV !== "production") {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    let queryResult = await User.findOne({
-      attributes: ['id', 'name', 'email'],
+    let user = await User.findOne({
+      attributes: ['user_id', 'username', 'email'],
       where: {
         email: email,
       },
     });
 
-    let user = queryResult.dataValues;
     if (!user) {
       return res.status(400).send({ message: "Email is wrong or not exist" });
     }
@@ -31,7 +30,7 @@ export const login = async (req, res) => {
 
     // create access token and refresh token
     const Atoken = jwt.sign(
-      { id: user.id, name: user.name, email: user.email },
+      { user_id: user.user_id, username: user.username, email: user.email },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
     );
@@ -43,7 +42,7 @@ export const login = async (req, res) => {
     });
 
     const Rtoken = jwt.sign(
-      { id: user.id, name: user.name, email: user.email },
+      { user_id: user.user_id, username: user.username, email: user.email },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
     );
@@ -54,7 +53,7 @@ export const login = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    await User.update({ refreshToken: Rtoken }, { where: { id: user.id } });
+    await User.update({ refreshToken: Rtoken }, { where: { user_id: user.user_id } });
 
     return res.status(200).send({ user });
   } catch (err) {
@@ -68,21 +67,22 @@ export const register = async (req, res) => {
     const { name, email, password } = req.body;
     let existUser = await User.findOne({ email: email });
     if (existUser)
+    {
       return res.status(400).send({ message: "Email already exist" });
+    }
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    let queryResult = await User.create({
+    let user = await User.create({
       name,
       email,
       password: hashedPassword,
     });
 
-    let user = queryResult.dataValues;
     return res.status(200).send({ user });
   } catch (err) {
-    console.log(err.message);
     return res.status(500).send(err.message);
   }
 };
