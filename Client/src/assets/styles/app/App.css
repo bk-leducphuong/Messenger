@@ -1,6 +1,6 @@
 body {
   margin: 0px;
-  background-image: url("./Components/Auth/background.webp");
+  background-image: url("../../images/background.webp");
   background-size: cover;
   box-sizing: border-box;
 }

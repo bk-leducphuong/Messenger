@@ -52,7 +52,7 @@ const authenticate = async (req, res, next) => {
                 },
               });
 
-              if (queryResult.dataValues.refreshToken !== Rtoken) {
+              if (queryResult.dataValues.refresh_token !== Rtoken) {
                 return res.status(400).send({
                   message:
                     "authorization token was not provided or was not valid",
@@ -81,6 +81,7 @@ const authenticate = async (req, res, next) => {
       }
     );
   } catch (error) {
+    console.error(error);
     res.status(500).send({
       message: "Something went wrong while validating the user token",
     });

@@ -6,15 +6,11 @@ import {
   UPLOAD_PIC,
 } from "./action";
 
-const user = JSON.parse(localStorage.getItem("userInfo")) || {
-  user: {},
-  token: "",
-};
 const initState = {
-  user: user.user,
+  user: {},
   loading: false,
   error: false,
-  token: user.token,
+  isAuthenticated: false,
 };
 
 export const authReducer = (store = initState, { type, payload }) => {
@@ -25,7 +21,7 @@ export const authReducer = (store = initState, { type, payload }) => {
         user: payload.user,
         loading: false,
         error: false,
-        token: payload.token,
+        isAuthenticated: true,
       };
     case UPLOAD_PIC:
       return {
@@ -34,8 +30,8 @@ export const authReducer = (store = initState, { type, payload }) => {
         loading: false,
         error: false,
       };
-    case AUTH_ERROR:
-      return { ...store, error: payload };
+    case AUTH_ERROR: // authentication fail
+      return { ...store, error: payload, loading: false, isAuthenticated: false };
     case AUTH_LOADING:
       return { ...store, loading: payload };
     case LOGOUT:

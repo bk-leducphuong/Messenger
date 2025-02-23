@@ -1,6 +1,6 @@
 import { Avatar, Badge } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { accessChat, makeRecentChatApi } from "../redux/recentChat/action";
+// import { accessChat, makeRecentChatApi } from "../redux/recentChat/action";
 
 export const SearchComp = ({
   id,
@@ -13,8 +13,8 @@ export const SearchComp = ({
 }) => {
   const dispatch = useDispatch();
   const handleSubmitForAcceChat = () => {
-    dispatch(accessChat(id, token, recent_chat));
-    setSearch(false);
+    // dispatch(accessChat(id, token, recent_chat));
+    // setSearch(false);
   };
   return (
     <div onClick={handleSubmitForAcceChat} className="user">

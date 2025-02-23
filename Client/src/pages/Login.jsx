@@ -9,11 +9,21 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useDispatch, useSelector } from "react-redux";
 import { authLogin } from "../redux/auth/action";
 
+function isValidEmail(email) {
+  // const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  // return re.test(String(email).toLowerCase());
+  return true;
+}
+
 export const LoginComp = () => {
-  const { user, loading, error } = useSelector((store) => store.user);
+  const { user, loading, error, isAuthenticated } = useSelector((store) => store.user);
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+  
   const [loginData, setLoginData] = useState({
-    email: "albert@gmail.com",
-    password: "albert",
+    email: "", // Remove default values
+    password: "",
   });
   const dispatch = useDispatch();
   const handleChange = (e) => {
@@ -21,12 +31,19 @@ export const LoginComp = () => {
     setLoginData({ ...loginData, [name]: value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    if (!loginData.email || !loginData.password) {
+      // Add error handling for empty fields
+      return;
+    }
+    if (!isValidEmail(loginData.email)) {
+      // Add email format validation
+      return;
+    }
     dispatch(authLogin(loginData));
   };
-  if (user.id) {
-    return <Navigate to={"/"} />;
-  }
+
   return (
     <div className="auth-cont">
       <div>
@@ -42,6 +59,7 @@ export const LoginComp = () => {
             type="password"
             onChange={handleChange}
             className="inputcom"
+            autoComplete="current-password"
           />
 
           {loading ? (

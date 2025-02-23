@@ -1,22 +1,28 @@
-export const RECENT_LOADING = "RECENT_LOADING";
-export const RECENT_ERROR = "RECENT_ERROR";
-export const ADD_RECENT_CHAT = "ADD_RECENT_CHAT";
-export const NEW_CREATED_CHAT = "NEW_CREATED_CHAT";
-import { selectChat } from "../Chatting/action";
-export const recentLoading = (payload) => ({ type: RECENT_LOADING, payload });
-export const recentError = (payload) => ({ type: RECENT_ERROR, payload });
-export const recentChatResult = (payload) => ({
-  type: ADD_RECENT_CHAT,
-  payload,
-});
-export const newCreatedChat = (payload) => ({
-  type: NEW_CREATED_CHAT,
-  payload,
-});
+export const CONVERSATION_LOADING = "CONVERSATION_LOADING";
+export const CONVERSATION_ERROR = "CONVERSATION_ERROR";
+export const ADD_CONVERSATION = "ADD_CONVERSATION";
+// export const NEW_CREATED_CONVERSATION = "NEW_CREATED_CONVERSATION";
 
-export const makeRecentChatApi = () => async (dispatch) => {
-  dispatch(recentLoading(true));
-  const url = import.meta.env.VITE_API_URL + "/chat";
+export const conversationLoading = (payload) => ({
+  type: CONVERSATION_LOADING,
+  payload,
+});
+export const conversationError = (payload) => ({
+  type: CONVERSATION_ERROR,
+  payload,
+});
+export const conversationResult = (payload) => ({
+  type: ADD_CONVERSATION,
+  payload,
+});
+// export const newC = (payload) => ({
+//   type: NEW_CREATED_CHAT,
+//   payload,
+// });
+
+export const getAllConversations = () => async (dispatch) => {
+  dispatch(conversationLoading(true));
+  const url = import.meta.env.VITE_API_URL + "/conversations";
   try {
     let res = await fetch(url, {
       method: "GET",
@@ -26,10 +32,10 @@ export const makeRecentChatApi = () => async (dispatch) => {
       credentials: "include",
     });
     let data = await res.json();
-    dispatch(recentChatResult(data));
+    console.log(data);
+    dispatch(conversationResult(data));
   } catch (err) {
-    dispatch(recentError(true));
-    console.log(err.message);
+    dispatch(conversationError(true));
   }
 };
 

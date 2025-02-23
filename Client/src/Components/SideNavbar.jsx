@@ -15,7 +15,7 @@ export const SideNavbar = () => {
   return (
     <div className="side-nav">
       <div>
-        <Avatar src={user.pic} />
+        <Avatar src={user.avatar_url ? user.avatar_url : "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} />
       </div>
       <div className="mid-icon">
         <LightTooltip title="Profile" placement="top">

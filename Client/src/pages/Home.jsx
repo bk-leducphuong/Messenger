@@ -9,10 +9,6 @@ export const HomeComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
   const { chatting } = useSelector((store) => store.chatting);
 
-  // if (!user.id) {
-  //   return <Navigate to="/login" />;
-  // }
-
   return (
     <div className="home-cont">
       <SideNavbar />

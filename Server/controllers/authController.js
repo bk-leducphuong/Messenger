@@ -8,6 +8,15 @@ if (process.env.NODE_ENV !== "production") {
   dotenv.config({ path: ".env.production" });
 }
 
+export const checkAuth = async (req, res) => {
+  try {
+    const user = req.user; // {user_id, username, email}
+    return res.status(200).send({ user: user });
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+};
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -53,11 +62,10 @@ export const login = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    await User.update({ refreshToken: Rtoken }, { where: { user_id: user.user_id } });
+    await User.update({ refresh_token: Rtoken }, { where: { user_id: user.user_id } });
 
-    return res.status(200).send({ user });
+    return res.status(200).send({ user: user});
   } catch (err) {
-    console.error(err);
     return res.status(500).send(err.message);
   }
 };
@@ -81,7 +89,7 @@ export const register = async (req, res) => {
       password: hashedPassword,
     });
 
-    return res.status(200).send({ user });
+    return res.status(200).send({ user: user });
   } catch (err) {
     return res.status(500).send(err.message);
   }

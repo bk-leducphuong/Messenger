@@ -6,17 +6,20 @@ import Typography from "@mui/material/Typography";
 import { Avatar, Badge } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { makeSearchApi } from "../redux/searching/action";
-import { accessChat, makeRecentChatApi } from "../redux/recentChat/action";
+import { accessChat, getAllConversations } from "../redux/recentChat/action";
 import { selectChat } from "../redux/chatting/action";
 import { SearchComp } from "../components/SearchComp";
 import { NotificationComp } from "../components/NotificationComp";
 
 export const MyChat = () => {
+  // state component
   const [search, setSearch] = useState(false);
+
+  // redux store
   const { search_result, loading, error } = useSelector(
     (store) => store.search
   );
-  const { recent_chat, loading: chat_loading } = useSelector( // recent_chat = {id, }
+  const { allConversations, loading: chatLoading } = useSelector( // recent_chat = {id, }
     (store) => store.recentChat
   );
   const { user } = useSelector((store) => store.user); // user = {id, name, email}
@@ -25,11 +28,13 @@ export const MyChat = () => {
     (store) => store.notification
   );
 
+  // call api to get all conversations
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(makeRecentChatApi());
-  }, [user]);
+    dispatch(getAllConversations());
+  }, []);
 
+  // handle search action when user type in search bar
   const ref = useRef();
   const handleQuery = (e) => {
     let id;
@@ -79,14 +84,10 @@ export const MyChat = () => {
                   setSearch={setSearch}
                 />
               ))
-            : !chat_loading &&
-              recent_chat.map((el, index) => (
+            : !chatLoading &&
+              allConversations.map((conversation, index) => (
                 <ChatUserComp
-                  key={el.id}
-                  {...el}
-                  index={index}
-                  chattingwith={chatting.id}
-                  id={user.id}
+                  {...conversation}
                 />
               ))}
         </div>
@@ -96,43 +97,36 @@ export const MyChat = () => {
 };
 
 
-const ChatUserComp = ({
-  isGroupChat,
-  chatName,
-  users,
-  latestMessage,
-  id,
-  index,
-  chattingwith,
-}) => {
+const ChatUserComp = (conversation) => {
   const dispatch = useDispatch();
   const handleSelectChat = () => {
-    dispatch(
-      selectChat({
-        isGroupChat,
-        index,
-        user: users.find((el) => el.id != id),
-        id,
-        chatName,
-      })
-    );
+    // dispatch(
+    //   selectChat({
+    //     isGroupChat,
+    //     index,
+    //     user: users.find((el) => el.id != id),
+    //     id,
+    //     chatName,
+    //   })
+    // );
   };
   return (
     <div
       onClick={handleSelectChat}
-      className={chattingwith == id ? "user selectUser" : "user"}
+      class="user"
+      // className={chattingwith == id ? "user selectUser" : "user"}
     >
       <div className="history-cont">
-        {isGroupChat ? (
+        {conversation.conversation_type === "group" ? (
           <div>{<Avatar>G</Avatar>}</div>
         ) : (
-          <div>{<Avatar src={users.find((el) => el.id != id)?.pic} />}</div>
+          <div>{<Avatar src="https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg" />}</div>
         )}
         <div>
-          {isGroupChat ? (
-            <p className="name">{chatName}</p>
+          {conversation.conversation_type === "group" ? (
+            <p className="name">{conversation.conversation_name}</p>
           ) : (
-            <p className="name">{users.find((el) => el.id != id)?.name}</p>
+            <p className="name">username</p>
           )}
           {/* <p className="chat">
             {latestMessage
@@ -144,11 +138,11 @@ const ChatUserComp = ({
         </div>
       </div>
       <div>
-        {latestMessage ? (
+        {conversation.latest_message ? (
           <p className="time">
-            {new Date(latestMessage?.updatedAt).getHours() +
+            {new Date(conversation.latest_message?.updated_at).getHours() +
               ":" +
-              new Date(latestMessage?.updatedAt).getMinutes()}
+              new Date(conversation.latest_message?.updated_at).getMinutes()}
           </p>
         ) : (
           ""

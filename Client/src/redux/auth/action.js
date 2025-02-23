@@ -22,12 +22,10 @@ export const authRegister = (user) => async (dispatch) => {
       credentials: "include",
     });
     let data = await res.json();
-    localStorage.setItem("userInfo", JSON.stringify(data));
     dispatch(authUser(data));
   } catch (err) {
     dispatch(authLoading(false));
     dispatch(authError(true));
-    console.log(err.message);
   }
 };
 
@@ -43,14 +41,35 @@ export const authLogin = (user) => async (dispatch) => {
       credentials: "include",
     });
     let data = await res.json();
-    localStorage.setItem("userInfo", JSON.stringify(data));
+    dispatch(authUser(data));
+  } catch (err) {
+    dispatch(authLoading(false));
+    dispatch(authError(true));
+  }
+};
+
+export const logout = () => async (dispatch) => {
+  dispatch(authLogout());
+};
+
+export const checkAuth = () => async (dispatch) => {
+  dispatch(authLoading(true));
+  try {
+    let res = await fetch(import.meta.env.VITE_API_URL + "/auth/check", {
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+    });
+    let data = await res.json();
     dispatch(authUser(data));
   } catch (err) {
     dispatch(authLoading(false));
     dispatch(authError(true));
     console.log(err.message);
   }
-};
+};  
 
 export const uploadPic = (pic) => async (dispatch) => {
   dispatch(authLoading(true));
