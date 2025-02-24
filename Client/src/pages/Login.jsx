@@ -17,9 +17,6 @@ function isValidEmail(email) {
 
 export const LoginComp = () => {
   const { user, loading, error, isAuthenticated } = useSelector((store) => store.user);
-  if (isAuthenticated) {
-    return <Navigate to="/" />;
-  }
   
   const [loginData, setLoginData] = useState({
     email: "", // Remove default values
@@ -43,6 +40,11 @@ export const LoginComp = () => {
     }
     dispatch(authLogin(loginData));
   };
+
+  // return statement must be behind all the hooks
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div className="auth-cont">

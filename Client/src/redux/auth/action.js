@@ -67,7 +67,6 @@ export const checkAuth = () => async (dispatch) => {
   } catch (err) {
     dispatch(authLoading(false));
     dispatch(authError(true));
-    console.log(err.message);
   }
 };  
 
