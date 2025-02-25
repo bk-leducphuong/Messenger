@@ -2,22 +2,22 @@ import {
   ADD_MESSAGE,
   MESSAGE_ERROR,
   MESSAGE_LOADING,
-  SELECT_CHAT,
+  SELECT_CONVERSATION,
   SEND_MESSAGE,
 } from "./action";
 
 const initState = {
-  chatting: {},
+  activeConversation: {},
   messages: [],
   loading: false,
   error: false,
 };
-export const chattingReducer = (store = initState, { type, payload }) => {
+export const conversationReducer = (store = initState, { type, payload }) => {
   switch (type) {
-    case SELECT_CHAT:
+    case SELECT_CONVERSATION:
       return {
         ...store,
-        chatting: payload,
+        activeConversation: payload,
         loading: false,
         error: false,
       };

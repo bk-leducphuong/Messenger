@@ -7,7 +7,7 @@ import { Avatar, Badge } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { makeSearchApi } from "../redux/searching/action";
 import { accessChat, getAllConversations } from "../redux/recentChat/action";
-import { selectChat } from "../redux/chatting/action";
+import { selectConversation } from "../redux/chatting/action";
 import { SearchComp } from "../components/SearchComp";
 import { NotificationComp } from "../components/NotificationComp";
 
@@ -22,8 +22,7 @@ export const MyChat = () => {
   const { allConversations, loading: chatLoading } = useSelector( // recent_chat = {id, }
     (store) => store.recentChat
   );
-  const { user } = useSelector((store) => store.user); // user = {id, name, email}
-  const { chatting } = useSelector((store) => store.chatting);
+  const {  activeConversation } = useSelector((store) => store.conversation);
   const { notification, unseenmsg } = useSelector(
     (store) => store.notification
   );
@@ -87,7 +86,9 @@ export const MyChat = () => {
             : !chatLoading &&
               allConversations.map((conversation, index) => (
                 <ChatUserComp
+                  key={conversation.conversation_id}
                   {...conversation}
+                  activeConversation={activeConversation}
                 />
               ))}
         </div>
@@ -97,57 +98,47 @@ export const MyChat = () => {
 };
 
 
-const ChatUserComp = (conversation) => {
+const ChatUserComp = (conversation, activeConversation) => {
   const dispatch = useDispatch();
-  const handleSelectChat = () => {
-    // dispatch(
-    //   selectChat({
-    //     isGroupChat,
-    //     index,
-    //     user: users.find((el) => el.id != id),
-    //     id,
-    //     chatName,
-    //   })
-    // );
+  const handleSelectConversation = () => {
+    dispatch(
+      selectConversation(conversation)
+    );
   };
   return (
     <div
-      onClick={handleSelectChat}
+      onClick={handleSelectConversation}
       class="user"
-      // className={chattingwith == id ? "user selectUser" : "user"}
+      className={ conversation.conversation_id == activeConversation.conversation_id ? "user selectUser" : "user"}
     >
       <div className="history-cont">
         {conversation.conversation_type === "group" ? (
           <div>{<Avatar>G</Avatar>}</div>
         ) : (
-          <div>{<Avatar src="https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg" />}</div>
+          <div>{<Avatar src={conversation.participants[0].avatar_url} />}</div>
         )}
         <div>
-          {conversation.conversation_type === "group" ? (
-            <p className="name">{conversation.conversation_name}</p>
-          ) : (
-            <p className="name">username</p>
-          )}
-          {/* <p className="chat">
-            {latestMessage
-              ? latestMessage.content.length > 8
-                ? latestMessage.content.substring(0, 30) + " . . ."
-                : latestMessage.content
+          <p className="name">{conversation.conversation_name}</p>
+          <p className="chat">
+            {conversation.latest_message
+              ? conversation.latest_message.message_text.length > 8
+                ? conversation.latest_message.message_text.substring(0, 30) + " . . ."
+                : conversation.latest_message.message_text
               : ""}
-          </p> */}
+          </p>
         </div>
       </div>
       <div>
         {conversation.latest_message ? (
           <p className="time">
-            {new Date(conversation.latest_message?.updated_at).getHours() +
+            {new Date(conversation.latest_message.updated_at).getHours() +
               ":" +
-              new Date(conversation.latest_message?.updated_at).getMinutes()}
+              new Date(conversation.latest_message.updated_at).getMinutes()}
           </p>
         ) : (
           ""
         )}
-        {/* <p className="unseen-chat">5</p> */}
+        <p className="unseen-chat">5</p>
       </div>
     </div>
   );

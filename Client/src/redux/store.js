@@ -2,7 +2,7 @@ import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { authReducer } from "./auth/reducer";
-import { chattingReducer } from "./chatting/reducer";
+import { conversationReducer } from "./chatting/reducer";
 import { notyficationReducer } from "./notification/reducer";
 import { recentChatReducer } from "./recentChat/reducer";
 import { searchReducer } from "./searching/reducer";
@@ -27,7 +27,7 @@ export const store = configureStore({
     user: persistedReducer,
     search: searchReducer,
     recentChat: recentChatReducer,
-    chatting: chattingReducer,
+    conversation: conversationReducer,
     notification: notyficationReducer,
   },
   middleware: getDefaultMiddleware({

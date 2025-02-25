@@ -1,10 +1,10 @@
-export const SELECT_CHAT = "SELECT_CHAT";
+export const SELECT_CONVERSATION = "SELECT_CONVERSATION";
 export const ADD_MESSAGE = "ADD_MESSAGE";
 export const MESSAGE_LOADING = "MESSAGE_LOADING";
 export const MESSAGE_ERROR = "MESSAGE_ERROR";
 export const SEND_MESSAGE = "SEND_MESSAGE";
 
-export const selectChat = (payload) => ({ type: SELECT_CHAT, payload });
+export const selectConversation = (payload) => ({ type: SELECT_CONVERSATION, payload });
 export const addMessage = (payload) => ({ type: ADD_MESSAGE, payload });
 export const messageLoading = (payload) => ({ type: MESSAGE_LOADING, payload });
 export const messageError = (payload) => ({ type: MESSAGE_ERROR, payload });

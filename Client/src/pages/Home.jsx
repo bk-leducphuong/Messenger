@@ -7,23 +7,23 @@ import {SideNavbar} from "../components/SideNavbar";
 
 export const HomeComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
-  const { chatting } = useSelector((store) => store.chatting);
+  const { activeConversation } = useSelector((store) => store.conversation);
 
   return (
     <div className="home-cont">
       <SideNavbar />
       <MyChat />
-      {chatting.id ? <ChattingPage /> : <MessageStarter {...user} />}
+      {activeConversation.conversation_id ? <ChattingPage /> : <MessageStarter {...user} />}
     </div>
   );
 };
 
-const MessageStarter = ({ pic, name }) => {
+const MessageStarter = ({ username, avatar_url }) => {
   return (
     <div className="chattingpage start-msg">
       <div>
-        <Avatar src={pic} sx={{ width: 70, height: 70 }} />
-        <h3>Welcome, {name}</h3>
+        <Avatar src={avatar_url} sx={{ width: 70, height: 70 }} />
+        <h3>Welcome, {username}</h3>
         <p>Please select a chat to start messaging.</p>
       </div>
     </div>

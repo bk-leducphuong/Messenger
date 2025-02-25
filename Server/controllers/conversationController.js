@@ -40,6 +40,16 @@ export const getAllConversation = async (req, res) => {
         where: { conversation_id: conversationParticipant[i].conversation_id },
         order: [["created_at", "DESC"]],
       });
+
+      if (conversation.conversation_type === "direct") {
+        const participant = await User.findOne({
+          attributes: ["user_id", "username", "avatar_url"],
+          where: { user_id: participants[0].user_id },
+        });
+        conversation.conversation_name = participant.username;
+        participants[0] = participant;
+      }
+
       allConversations.push({
         conversation_id: conversation.conversation_id,
         conversation_name: conversation.conversation_name,
