@@ -62,6 +62,11 @@ export const checkAuth = () => async (dispatch) => {
       },
       credentials: "include",
     });
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    
     let data = await res.json();
     dispatch(authUser(data));
   } catch (err) {

@@ -7,7 +7,7 @@ import {
 } from "./action";
 
 const initState = {
-  user: null,
+  user: {},
   loading: false,
   error: null,
   isAuthenticated: false,
@@ -31,7 +31,7 @@ export const authReducer = (store = initState, { type, payload }) => {
         error: false,
       };
     case AUTH_ERROR: // authentication fail
-      return { ...store, error: payload };
+      return { user: {}, error: payload, loading: false, isAuthenticated: false };
     case AUTH_LOADING:
       return { ...store, loading: payload };
     case LOGOUT:

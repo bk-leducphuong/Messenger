@@ -6,10 +6,13 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import styled from "@emotion/styled";
 import SendIcon from "@mui/icons-material/Send";
 import InputEmoji from "react-input-emoji";
-import React, { createRef, useCallback, useEffect, useState } from "react";
+import React, { useRef, createRef, useCallback, useEffect, useState } from "react";
 import { ChatlogicStyling, isSameSender } from "./ChatstyleLogic";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCurrentMessages, sendMessageApi } from "../redux/chatting/action";
+import {
+  fetchConversationMessage,
+  sendMessageApi,
+} from "../redux/chatting/action";
 import { sendMessage } from "../redux/chatting/action";
 import { addUnseenmsg } from "../redux/notification/action";
 import io from "socket.io-client";
@@ -18,49 +21,64 @@ const SERVER_POINT = import.meta.env.VITE_API_URL;
 var socket, currentChattingWith;
 
 export const ChattingPage = () => {
-  const { user, token } = useSelector((store) => store.user);
-  const { messages } = useSelector((store) => store.chatting);
+  const { user } = useSelector((store) => store.user);
+  const { messages } = useSelector((store) => store.conversation);
   var { unseenmsg } = useSelector((store) => store.notification);
-  const {
-    chatting: {
-      isGroupChat,
-      chatName,
-      user: { pic, name },
-      _id,
-    },
-  } = useSelector((store) => store.chatting);
+  const { activeConversation } = useSelector((store) => store.conversation);
   const scrolldiv = createRef();
+  const socketRef = useRef();
   const dispatch = useDispatch();
+
+  // Initialize socket connection
   useEffect(() => {
-    socket = io(SERVER_POINT);
-    socket.emit("setup", user);
-    socket.on("connected", () => {
-      // setconnectedtosocket(true);
+    socketRef.current = io(SERVER_POINT);
+    socketRef.current.emit("setup", user);
+    socketRef.current.on("connected", () => {
+      console.log("Socket connected");
     });
-  }, []);
-  useEffect(() => {
-    //_id is of selected chat so that user can join same chat room
-    if (!_id) return;
-    dispatch(fetchCurrentMessages(_id, token, socket));
 
-    currentChattingWith = _id;
-  }, [_id]);
-  useEffect(() => {
-    const scrollToBottom = (node) => {
-      node.scrollTop = node.scrollHeight;
+    // Cleanup socket connection
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
     };
-    scrollToBottom(scrolldiv.current);
-  });
+  }, [user]);
 
+  // fetch messages
   useEffect(() => {
-    socket.on("message recieved", (newMessage) => {
-      if (!currentChattingWith || currentChattingWith !== newMessage.chat._id) {
-        handleNotyfy(newMessage);
+    if (!activeConversation?.conversation_id) return;
+    dispatch(
+      fetchConversationMessage(activeConversation.conversation_id, socketRef.current)
+    );
+  }, [dispatch, activeConversation]);
+
+  // Handle incoming messages
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    const messageHandler = (newMessage) => {
+      if (!activeConversation || activeConversation.conversation_id !== newMessage.chat._id) {
+        dispatch(addUnseenmsg(newMessage));
       } else {
         dispatch(sendMessage(newMessage));
       }
-    });
-  }, []);
+    };
+
+    socketRef.current.on("message recieved", messageHandler);
+
+    return () => {
+      socketRef.current.off("message recieved", messageHandler);
+    };
+  }, [activeConversation, dispatch]);
+
+  // Scroll to bottom when messages update
+  useEffect(() => {
+    if (scrolldiv.current && messages.length > 0) {
+      scrolldiv.current.scrollTop = scrolldiv.current.scrollHeight;
+    }
+  }, [messages]);
+
   const handleNotyfy = (newMessage) => {
     dispatch(addUnseenmsg(newMessage));
   };
@@ -68,8 +86,14 @@ export const ChattingPage = () => {
     <div className="chattingpage">
       <div className="top-header">
         <div className="user-header">
-          <Avatar src={isGroupChat ? "" : pic} />
-          <p className="user-name">{isGroupChat ? chatName : name}</p>
+          <Avatar
+            src={
+              activeConversation.conversation_type == "group"
+                ? "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                : activeConversation.participants[0].avatar_url
+            }
+          />
+          <p className="user-name">{activeConversation.conversation_name}</p>
         </div>
         <div>
           <div className="user-fet">
@@ -81,28 +105,38 @@ export const ChattingPage = () => {
         </div>
       </div>
       <div ref={scrolldiv} className="live-chat">
-        {messages.map((el, index) => (
+        {messages.map((message, index) => (
           <div
-            key={index}
+            key={message.message_id || index}
             className={
-              el.sender._id != user._id ? "rihgtuser-chat" : "leftuser-chat"
+              message.sender_id != user.user_id
+                ? "rihgtuser-chat"
+                : "leftuser-chat"
             }
           >
             <div
-              className={el.sender._id != user._id ? "right-avt" : "left-avt"}
+              className={
+                message.sender_id != user.user_id ? "right-avt" : "left-avt"
+              }
             >
-              <div className={ChatlogicStyling(el.sender._id, user._id)}>
-                <p>{el.content}</p>
+              <div
+                className={ChatlogicStyling(message.sender_id, user.user_id)}
+              >
+                <p>{message.message_text}</p>
                 <p className="time chat-time">
-                  {new Date(el.createdAt).getHours() +
+                  {new Date(message.created_at).getHours() +
                     ":" +
-                    new Date(el.createdAt).getMinutes()}
+                    new Date(message.created_at).getMinutes()}
                 </p>
               </div>
 
               {isSameSender(messages, index) ? (
                 <Avatar
-                  src={el.sender._id != user._id ? el.sender.pic : user.pic}
+                  src={
+                    message.sender_id != user.user_id
+                      ? "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                      : user.avatar_url
+                  }
                 />
               ) : (
                 <div className="blank-div"></div>
@@ -112,7 +146,7 @@ export const ChattingPage = () => {
         ))}
       </div>
       <div className="sender-cont">
-        <InputContWithEmog id={_id} token={token} socket={socket} />
+        <InputContWithEmog id={activeConversation.conversation_id} token={user.token} socket={socketRef.current} />
       </div>
     </div>
   );
@@ -128,6 +162,7 @@ const ColorButton = styled(Button)(() => ({
     backgroundColor: "#3a45c3",
   },
 }));
+
 function InputContWithEmog({ id, token, socket }) {
   const [text, setText] = useState("");
   const dispatch = useDispatch();

@@ -4,8 +4,13 @@ export const sendMessage = (req, res) => {
 
 };
 
-export const getMessages = (req, res) => {
-
+export const getMessages = async (req, res) => {
+    const { conversationId } = req.params;
+    const messages = await Message.findAll({
+        where: { conversation_id: conversationId },
+        order: [["created_at", "ASC"]],
+    });
+    return res.status(200).json(messages);
 };
 
 export const editMessage = (req, res) => {

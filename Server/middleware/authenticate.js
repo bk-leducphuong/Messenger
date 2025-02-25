@@ -43,7 +43,7 @@ const authenticate = async (req, res, next) => {
                 });
               }
 
-              // Check if the refresh token is in the database
+              // Check if the refresh token is same as the one in the database
               const queryResult = await User.findOne({
                 atrributes: ["refresh_token"],
                 where: {

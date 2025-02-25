@@ -10,22 +10,22 @@ export const messageLoading = (payload) => ({ type: MESSAGE_LOADING, payload });
 export const messageError = (payload) => ({ type: MESSAGE_ERROR, payload });
 export const sendMessage = (payload) => ({ type: SEND_MESSAGE, payload });
 
-export const fetchCurrentMessages = (id, token, socket) => async (dispatch) => {
+export const fetchConversationMessage = (conversationId, socket) => async (dispatch) => {
   dispatch(messageLoading(true));
-  const url = import.meta.env.VITE_API_URL + `/message/${id}`;
+  const url = import.meta.env.VITE_API_URL + `/conversations/${conversationId}/messages`;
   try {
     let res = await fetch(url, {
       method: "GET",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     let data = await res.json();
-    socket.emit("join chat", id);
     dispatch(addMessage(data));
+    
+    socket.emit("join chat", id);
   } catch (err) {
-    console.log(err);
     dispatch(messageError(true));
   }
 };

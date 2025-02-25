@@ -12,6 +12,6 @@ export const isSameSender = (message, index) => {
   }
   return (
     index < message.length - 1 &&
-    message[index].sender._id != message[index + 1].sender._id
+    message[index].sender_id != message[index + 1].sender_id
   );
 };

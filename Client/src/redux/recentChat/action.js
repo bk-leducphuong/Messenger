@@ -32,7 +32,6 @@ export const getAllConversations = () => async (dispatch) => {
       credentials: "include",
     });
     let data = await res.json();
-    console.log(data);
     dispatch(conversationResult(data));
   } catch (err) {
     dispatch(conversationError(true));

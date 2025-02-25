@@ -108,7 +108,6 @@ const ChatUserComp = (conversation, activeConversation) => {
   return (
     <div
       onClick={handleSelectConversation}
-      class="user"
       className={ conversation.conversation_id == activeConversation.conversation_id ? "user selectUser" : "user"}
     >
       <div className="history-cont">
