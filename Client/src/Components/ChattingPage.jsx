@@ -17,7 +17,6 @@ import { sendMessage } from "../redux/chatting/action";
 import { addUnseenmsg } from "../redux/notification/action";
 import io from "socket.io-client";
 
-const SERVER_POINT = import.meta.env.VITE_API_URL;
 var socket, currentChattingWith;
 
 export const ChattingPage = () => {
@@ -31,7 +30,7 @@ export const ChattingPage = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    socketRef.current = io(SERVER_POINT);
+    socketRef.current = io(import.meta.env.VITE_SOCKET_SERVER_API);
     socketRef.current.emit("setup", user);
     socketRef.current.on("connected", () => {
       console.log("Socket connected");
@@ -58,17 +57,21 @@ export const ChattingPage = () => {
     if (!socketRef.current) return;
 
     const messageHandler = (newMessage) => {
-      if (!activeConversation || activeConversation.conversation_id !== newMessage.chat._id) {
-        dispatch(addUnseenmsg(newMessage));
+      if (!activeConversation || activeConversation.conversation_id !== newMessage.conversation_id) {
+        // dispatch(addUnseenmsg(newMessage));
+        //TODO: add new message to UI
+        //....
+        //TODO: play notification sound
+        //....
       } else {
-        dispatch(sendMessage(newMessage));
+        // dispatch(sendMessage(newMessage));
       }
     };
 
-    socketRef.current.on("message recieved", messageHandler);
+    socketRef.current.on("message:new", messageHandler);
 
     return () => {
-      socketRef.current.off("message recieved", messageHandler);
+      socketRef.current.off("message:new", messageHandler);
     };
   }, [activeConversation, dispatch]);
 
@@ -146,7 +149,7 @@ export const ChattingPage = () => {
         ))}
       </div>
       <div className="sender-cont">
-        <InputContWithEmog id={activeConversation.conversation_id} token={user.token} socket={socketRef.current} />
+        <InputContWithEmog id={activeConversation.conversation_id} socket={socketRef.current} />
       </div>
     </div>
   );
@@ -163,7 +166,7 @@ const ColorButton = styled(Button)(() => ({
   },
 }));
 
-function InputContWithEmog({ id, token, socket }) {
+function InputContWithEmog({ conversationId, socket }) {
   const [text, setText] = useState("");
   const dispatch = useDispatch();
 
@@ -171,10 +174,11 @@ function InputContWithEmog({ id, token, socket }) {
     dispatch(
       sendMessageApi(
         {
-          content: text,
-          chatId: id,
+          messageText: text,
+          conversationId: conversationId,
+          messageType: "text",
+          fileUrl: null,
         },
-        token,
         socket
       )
     );
@@ -183,10 +187,11 @@ function InputContWithEmog({ id, token, socket }) {
     dispatch(
       sendMessageApi(
         {
-          content: text,
-          chatId: id,
+          messageText: text,
+          conversationId: conversationId,
+          messageType: "text",
+          fileUrl: null,
         },
-        token,
         socket
       )
     );

@@ -24,26 +24,27 @@ export const fetchConversationMessage = (conversationId, socket) => async (dispa
     let data = await res.json();
     dispatch(addMessage(data));
     
-    socket.emit("join chat", id);
+    socket.emit("join conversation", conversationId);
   } catch (err) {
     dispatch(messageError(true));
   }
 };
 
-export const sendMessageApi = (msg, token, socket) => async (dispatch) => {
-  const url = process.env.API_URL + "/message";
+export const sendMessageApi = (msg, socket) => async (dispatch) => {
+  const url = import.meta.env.VITE_API_URL + `/conversations/${msg.conversationId}/messages`;
   try {
     let res = await fetch(url, {
       method: "POST",
       body: JSON.stringify(msg),
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
     });
-    let data = await res.json();
-    socket.emit("new message", data);
-    dispatch(sendMessage(data));
+    let message = await res.json();
+
+    socket.emit("message:send", message);
+
+    dispatch(sendMessage(message));
   } catch (err) {
     console.log(err.message);
   }

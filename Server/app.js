@@ -55,17 +55,14 @@ io.on("connection", (socket) => {
     socket.emit("connected");
   });
 
-  socket.on("join chat", (conversationId) => {
-    socket.join(conversationId);
+  socket.on("join conversation", (conversationId) => {
+    socket.join(`conversation:${conversationId}`);
   });
 
-  socket.on("new message", (recievedMessage) => {
-    const chat = recievedMessage.chat;
-    chat.users.forEach((user) => {
-      if (user == recievedMessage.sender._id) return;
-      socket.in(user).emit("message recieved", recievedMessage);
-    });
+  socket.on("message:send", (message) => {
+    socket.in(`conversation:${message.conversation_id}`).emit("message:new", message);
   });
+
 
   socket.off("setup", () => {
     socket.leave(userData._id);
