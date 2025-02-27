@@ -1,7 +1,16 @@
 import Message from '../model/message.js';
 
 export const sendMessage = (req, res) => {
-
+    const { conversationId, messageType, messageText, fileUrl } = req.body;
+    const messageObj = new Message({
+        conversation_id: conversationId,
+        sender_id: req.user.user_id,
+        message_type: messageType,
+        message_text: messageText,
+        file_url: fileUrl,
+    });
+    messageObj.save();
+    return res.status(200).json(messageObj);
 };
 
 export const getMessages = async (req, res) => {

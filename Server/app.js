@@ -50,13 +50,13 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("setup", (userData) => {
-    socket.join(userData._id);
+  socket.on("setup", (user) => {
+    socket.join(user.user_id);
     socket.emit("connected");
   });
 
-  socket.on("join chat", (room) => {
-    socket.join(room);
+  socket.on("join chat", (conversationId) => {
+    socket.join(conversationId);
   });
 
   socket.on("new message", (recievedMessage) => {
