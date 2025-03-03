@@ -62,8 +62,30 @@ io.on("connection", (socket) => {
     socket.in(`conversation:${message.conversation_id}`).emit("message:new", message);
   });
 
+  // Handle typing event
+  socket.on("typing:start", ({ conversationId, user }) => {
+    console.log("typing:start", { conversationId, user });
+    // Broadcast to all users in the conversation room except sender
+    socket.to(conversationId).emit("typing:update", {
+      conversationId,
+      userId: user.user_id,
+      userName: user.username,
+      isTyping: true
+    });
+  });
 
-  socket.off("setup", () => {
-    // socket.leave(userData._id);
+
+  // Optional: Add typing stop event
+  socket.on("typing:stop", ({ conversationId, user }) => {
+    socket.to(conversationId).emit("typing:update", {
+      conversationId,
+      userId: user.user_id,
+      userName: user.username,
+      isTyping: false
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:");
   });
 });

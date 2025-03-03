@@ -16,8 +16,8 @@ import {
 import { sendMessage } from "../redux/chatting/action";
 import { addUnseenmsg } from "../redux/notification/action";
 import io from "socket.io-client";
+import { debounce } from "lodash";
 
-var socket, currentChattingWith;
 
 export const ChattingPage = () => {
   const { user } = useSelector((store) => store.user);
@@ -27,6 +27,7 @@ export const ChattingPage = () => {
   const scrolldiv = createRef();
   const socketRef = useRef();
   const dispatch = useDispatch();
+  const [typingUsers, setTypingUsers] = useState({});
 
   // Initialize socket connection
   useEffect(() => {
@@ -78,6 +79,36 @@ export const ChattingPage = () => {
       scrolldiv.current.scrollTop = scrolldiv.current.scrollHeight;
     }
   }, [messages]);
+
+  // Add this new useEffect for typing status
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    socketRef.current.on("typing:update", ({ userId, userName, isTyping }) => {
+      setTypingUsers(prev => ({
+        ...prev,
+        [userId]: {
+          userName,
+          isTyping
+        }
+      }));
+    });
+
+    return () => {
+      socketRef.current.off("typing:update");
+    };
+  }, []);
+
+  // Add this helper function
+  const getTypingIndicator = () => {
+    const typing = Object.values(typingUsers).filter(user => user.isTyping);
+    if (typing.length === 0) return null;
+    
+    if (typing.length === 1) {
+      return `${typing[0].userName} is typing...`;
+    }
+    return `${typing.length} people are typing...`;
+  };
 
   const handleNotyfy = (newMessage) => {
     dispatch(addUnseenmsg(newMessage));
@@ -145,8 +176,20 @@ export const ChattingPage = () => {
           </div>
         ))}
       </div>
+      
+      {/* Add typing indicator above the input */}
+      {getTypingIndicator() && (
+        <div className="typing-indicator">
+          {getTypingIndicator()}
+        </div>
+      )}
+      
       <div className="sender-cont">
-        <InputContWithEmog conversationId={activeConversation.conversation_id} socket={socketRef.current} />
+        <InputContWithEmog 
+          user={user} 
+          conversationId={activeConversation.conversation_id} 
+          socket={socketRef.current} 
+        />
       </div>
     </div>
   );
@@ -163,9 +206,27 @@ const ColorButton = styled(Button)(() => ({
   },
 }));
 
-function InputContWithEmog({ conversationId, socket }) {
+function InputContWithEmog({ user, conversationId, socket }) {
   const [text, setText] = useState("");
   const dispatch = useDispatch();
+  
+  // Add debounce to avoid too many typing events
+  const handleTyping = useCallback(
+    debounce(() => {
+      if (socket) {
+        console.log("typing:start", { conversationId, user });
+        socket.emit("typing:start", { conversationId, user });
+      }
+    }, 500),
+    [socket, conversationId, user]
+  );
+
+   // Add handler for stopping typing
+  const handleStopTyping = useCallback(() => {
+    if (socket) {
+      socket.emit("typing:stop", { conversationId });
+    }
+  }, [socket, conversationId]);
 
   function handleOnEnter(text) {
     dispatch(
@@ -179,7 +240,9 @@ function InputContWithEmog({ conversationId, socket }) {
         socket
       )
     );
+    handleStopTyping();
   }
+
   function handleChatClick() {
     dispatch(
       sendMessageApi(
@@ -193,16 +256,23 @@ function InputContWithEmog({ conversationId, socket }) {
       )
     );
     setText("");
+    handleStopTyping();
   }
+
+  const handleTextChange = (newText) => {
+    setText(newText);
+    handleTyping(); // Emit typing event when text changes
+  };
 
   return (
     <>
       <div className="search-cont send-message">
         <InputEmoji
           value={text}
-          onChange={setText}
+          onChange={handleTextChange}
           cleanOnEnter
           onEnter={handleOnEnter}
+          onBlur={handleStopTyping}
           placeholder="Type a message"
         />
       </div>

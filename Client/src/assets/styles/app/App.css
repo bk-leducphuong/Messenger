@@ -296,3 +296,23 @@ body {
 svg {
   cursor: pointer;
 }
+
+
+.typing-indicator {
+  padding: 8px 16px;
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+.typing-indicator::after {
+  content: '...';
+  animation: dots 1s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80% { content: '...'; }
+}

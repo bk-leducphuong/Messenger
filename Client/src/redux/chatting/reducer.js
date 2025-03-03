@@ -4,6 +4,7 @@ import {
   MESSAGE_LOADING,
   SELECT_CONVERSATION,
   SEND_MESSAGE,
+  // SET_TYPING_STATUS,
 } from "./action";
 
 const initState = {
@@ -11,6 +12,7 @@ const initState = {
   messages: [],
   loading: false,
   error: false,
+  // typingUsers: {},
 };
 export const conversationReducer = (store = initState, { type, payload }) => {
   switch (type) {
@@ -34,6 +36,20 @@ export const conversationReducer = (store = initState, { type, payload }) => {
       return { ...store, loading: payload };
     case MESSAGE_ERROR:
       return { ...store, error: payload };
+    // case SET_TYPING_STATUS:
+    //   return {
+    //     ...store,
+    //     typingUsers: {
+    //       ...store.typingUsers,
+    //       [payload.conversationId]: {
+    //         ...store.typingUsers[payload.conversationId],
+    //         [payload.userId]: {
+    //           userName: payload.userName,
+    //           isTyping: payload.isTyping
+    //         }
+    //       }
+    //     }
+    //   };
     default:
       return store;
   }
