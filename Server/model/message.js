@@ -58,7 +58,6 @@ const Message = sequelize.define(
     },
   },
   {
-    sequelize,
     timestamps: false,
   }
 );

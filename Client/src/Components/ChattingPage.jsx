@@ -58,13 +58,10 @@ export const ChattingPage = () => {
 
     const messageHandler = (newMessage) => {
       if (!activeConversation || activeConversation.conversation_id !== newMessage.conversation_id) {
-        // dispatch(addUnseenmsg(newMessage));
-        //TODO: add new message to UI
-        //....
-        //TODO: play notification sound
-        //....
+        // Play notification sound
+        handleNotyfy(newMessage);
       } else {
-        // dispatch(sendMessage(newMessage));
+        dispatch(sendMessage(newMessage));
       }
     };
 
@@ -149,7 +146,7 @@ export const ChattingPage = () => {
         ))}
       </div>
       <div className="sender-cont">
-        <InputContWithEmog id={activeConversation.conversation_id} socket={socketRef.current} />
+        <InputContWithEmog conversationId={activeConversation.conversation_id} socket={socketRef.current} />
       </div>
     </div>
   );

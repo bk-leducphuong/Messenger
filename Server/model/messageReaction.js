@@ -1,5 +1,8 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
+import Message from "./message.js";
+import User from "./user.js";
+
 
 const MessageReaction = sequelize.define(
   "message_reaction",
@@ -30,9 +33,7 @@ const MessageReaction = sequelize.define(
     },
   },
   {
-    sequelize,
     timestamps: false,
-    primaryKey: ["message_id", "user_id", "reaction"],
   }
 );
 

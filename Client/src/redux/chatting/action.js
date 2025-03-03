@@ -39,6 +39,7 @@ export const sendMessageApi = (msg, socket) => async (dispatch) => {
       headers: {
         "content-type": "application/json",
       },
+      credentials: "include",
     });
     let message = await res.json();
 

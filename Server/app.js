@@ -44,7 +44,6 @@ const server = app.listen(PORT, async () => {
 const io = new Server(server, {
   pingTimeout: 6000,
   cors: {
-    "Access-Control-Allow-Origin": "*",
     origin: process.env.CLIENT_URL,
   },
 });
@@ -65,6 +64,6 @@ io.on("connection", (socket) => {
 
 
   socket.off("setup", () => {
-    socket.leave(userData._id);
+    // socket.leave(userData._id);
   });
 });
