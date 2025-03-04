@@ -15,47 +15,28 @@ import {
 } from "../redux/chatting/action";
 import { sendMessage } from "../redux/chatting/action";
 import { addUnseenmsg } from "../redux/notification/action";
-import io from "socket.io-client";
 import { debounce } from "lodash";
 
-
-export const ChattingPage = () => {
+export const ChattingPage = ({ socket }) => {
   const { user } = useSelector((store) => store.user);
   const { messages } = useSelector((store) => store.conversation);
   var { unseenmsg } = useSelector((store) => store.notification);
   const { activeConversation } = useSelector((store) => store.conversation);
   const scrolldiv = createRef();
-  const socketRef = useRef();
   const dispatch = useDispatch();
   const [typingUsers, setTypingUsers] = useState({});
-
-  // Initialize socket connection
-  useEffect(() => {
-    socketRef.current = io(import.meta.env.VITE_SOCKET_SERVER_API);
-    socketRef.current.emit("setup", user);
-    socketRef.current.on("connected", () => {
-      console.log("Socket connected");
-    });
-
-    // Cleanup socket connection
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [user]);
 
   // fetch messages
   useEffect(() => {
     if (!activeConversation?.conversation_id) return;
     dispatch(
-      fetchConversationMessage(activeConversation.conversation_id, socketRef.current)
+      fetchConversationMessage(activeConversation.conversation_id, socket)
     );
   }, [dispatch, activeConversation]);
 
   // Handle incoming messages
   useEffect(() => {
-    if (!socketRef.current) return;
+    if (!socket) return;
 
     const messageHandler = (newMessage) => {
       if (!activeConversation || activeConversation.conversation_id !== newMessage.conversation_id) {
@@ -66,12 +47,12 @@ export const ChattingPage = () => {
       }
     };
 
-    socketRef.current.on("message:new", messageHandler);
+    socket.on("message:new", messageHandler);
 
     return () => {
-      socketRef.current.off("message:new", messageHandler);
+      socket.off("message:new", messageHandler);
     };
-  }, [activeConversation, dispatch]);
+  }, [activeConversation, dispatch, socket]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
@@ -82,9 +63,9 @@ export const ChattingPage = () => {
 
   // Add this new useEffect for typing status
   useEffect(() => {
-    if (!socketRef.current) return;
+    if (!socket) return;
 
-    socketRef.current.on("typing:update", ({ userId, userName, isTyping }) => {
+    socket.on("typing:update", ({ userId, userName, isTyping }) => {
       setTypingUsers(prev => ({
         ...prev,
         [userId]: {
@@ -95,11 +76,10 @@ export const ChattingPage = () => {
     });
 
     return () => {
-      socketRef.current.off("typing:update");
+      socket.off("typing:update");
     };
-  }, []);
+  }, [socket]);
 
-  // Add this helper function
   const getTypingIndicator = () => {
     const typing = Object.values(typingUsers).filter(user => user.isTyping);
     if (typing.length === 0) return null;
@@ -113,6 +93,7 @@ export const ChattingPage = () => {
   const handleNotyfy = (newMessage) => {
     dispatch(addUnseenmsg(newMessage));
   };
+
   return (
     <div className="chattingpage">
       <div className="top-header">
@@ -188,24 +169,12 @@ export const ChattingPage = () => {
         <InputContWithEmog 
           user={user} 
           conversationId={activeConversation.conversation_id} 
-          socket={socketRef.current} 
+          socket={socket}
         />
       </div>
     </div>
   );
 };
-const ColorButton = styled(Button)(() => ({
-  color: "white",
-  fontSize: "20px",
-  textTransform: "none",
-  padding: "12px",
-  marginRight: "15px",
-  backgroundColor: "#5865f2",
-  "&:hover": {
-    backgroundColor: "#3a45c3",
-  },
-}));
-
 function InputContWithEmog({ user, conversationId, socket }) {
   const [text, setText] = useState("");
   const dispatch = useDispatch();
@@ -284,3 +253,15 @@ function InputContWithEmog({ user, conversationId, socket }) {
     </>
   );
 }
+
+const ColorButton = styled(Button)(() => ({
+  color: "white",
+  fontSize: "20px",
+  textTransform: "none",
+  padding: "12px",
+  marginRight: "15px",
+  backgroundColor: "#5865f2",
+  "&:hover": {
+    backgroundColor: "#3a45c3",
+  },
+}));

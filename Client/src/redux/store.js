@@ -6,6 +6,7 @@ import { conversationReducer } from "./chatting/reducer";
 import { notyficationReducer } from "./notification/reducer";
 import { recentChatReducer } from "./recentChat/reducer";
 import { searchReducer } from "./searching/reducer";
+import { activeUserReducer } from './activeUser/reducer';
 
 const persistConfig = {
   key: 'root',
@@ -29,6 +30,7 @@ export const store = configureStore({
     recentChat: recentChatReducer,
     conversation: conversationReducer,
     notification: notyficationReducer,
+    activeUser: activeUserReducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {

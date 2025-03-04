@@ -1,0 +1,154 @@
+/* Chat container styles */
+.mychat-cont {
+  color: #495057;
+  width: 26%;
+  height: 100vh;
+  min-width: 270px;
+  background-color: #f5f7fb;
+}
+
+/* Search container styles */
+.search-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e6ebf5;
+  padding: 5px;
+  width: 87%;
+  margin: auto;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.search-cont svg {
+  margin: 0 12px 0 12px;
+}
+
+.search-cont input {
+  outline: none;
+  border: none;
+  background-color: inherit;
+  width: 87%;
+  padding: 10px;
+  font-size: 17px;
+}
+
+/* Notification styles */
+.notification {
+  display: flex;
+  align-items: center;
+  margin: auto;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.notification h2 {
+  color: #495057;
+  font-family: "Public Sans", sans-serif;
+  font-weight: 600;
+}
+
+/* Recent chat styles */
+.recent-chat {
+  width: 100%;
+  margin: auto;
+}
+
+.Recent {
+  color: #495057;
+  font-family: "Public Sans", sans-serif;
+  font-weight: 600;
+  margin-left: 20px;
+}
+
+.recent-user {
+  overflow-y: scroll;
+  box-sizing: border-box;
+  height: 75vh;
+}
+
+.recent-user::-webkit-scrollbar {
+  width: 10px;
+}
+
+.recent-user::-webkit-scrollbar-thumb {
+  background: #c4ccdbb2;
+  border-radius: 10px;
+}
+
+/* User chat item styles */
+.user {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  height: 3.4rem;
+  padding: 11px 13px;
+  margin: 0px 12px;
+}
+
+.user:hover {
+  border-radius: 7px;
+  background-color: #e6ebf5;
+}
+
+.selectUser {
+  border-radius: 7px;
+  background-color: #e6ebf5;
+}
+
+.history-cont {
+  display: flex;
+  align-items: center;
+}
+
+.name {
+  color: #495057;
+  font-family: "Public Sans", sans-serif;
+  font-weight: 600;
+  margin-bottom: 0px;
+  margin-left: 14px;
+}
+
+.chat {
+  margin-top: 0px;
+  margin-left: 14px;
+  font-size: 15px;
+  color: #7a7f9a;
+}
+
+.time {
+  font-size: 12px;
+}
+
+.unseen-chat {
+  font-size: 14px;
+  color: #ef476f;
+  background-color: rgba(239, 71, 111, 0.18);
+  border-radius: 50%;
+  width: 20px;
+  text-align: center;
+}
+
+/* Add these new styles to your chat.css */
+.avatar-container {
+  position: relative;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.status-online {
+  background-color: #44b700;
+}
+
+.status-offline {
+  background-color: #808080;
+}

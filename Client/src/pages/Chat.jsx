@@ -1,3 +1,4 @@
+import "../assets/styles/chat/chat.css";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useRef, useState } from "react";
@@ -10,10 +11,12 @@ import { accessChat, getAllConversations } from "../redux/recentChat/action";
 import { selectConversation } from "../redux/chatting/action";
 import { SearchComp } from "../components/SearchComp";
 import { NotificationComp } from "../components/NotificationComp";
+import { setUserActive } from "../redux/activeUser/action";
 
-export const MyChat = () => {
+export const MyChat = ({ socket }) => {
   // state component
   const [search, setSearch] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState(new Map());
 
   // redux store
   const { search_result, loading, error } = useSelector(
@@ -32,6 +35,21 @@ export const MyChat = () => {
   useEffect(() => {
     dispatch(getAllConversations());
   }, []);
+
+  // Add useEffect for status updates
+  useEffect(() => {
+    if (!socket) {
+      return;
+    };
+
+    socket.on("user:status", ({ userId, status, timestamp }) => {
+      dispatch(setUserActive({ userId, status, timestamp }));
+    });
+
+    return () => {
+      socket.off("user:status");
+    };
+  }, [socket, dispatch]);
 
   // handle search action when user type in search bar
   const ref = useRef();
@@ -87,7 +105,7 @@ export const MyChat = () => {
               allConversations.map((conversation, index) => (
                 <ChatUserComp
                   key={conversation.conversation_id}
-                  {...conversation}
+                  conversation={conversation}
                   activeConversation={activeConversation}
                 />
               ))}
@@ -97,25 +115,34 @@ export const MyChat = () => {
   );
 };
 
+const ChatUserComp = ({ conversation, activeConversation }) => {
+  const { activeUsers } = useSelector((store) => store.activeUser);
 
-const ChatUserComp = (conversation, activeConversation) => {
   const dispatch = useDispatch();
   const handleSelectConversation = () => {
-    dispatch(
-      selectConversation(conversation)
-    );
+    dispatch(selectConversation(conversation));
   };
+
+  // Get the participant's online status
+  const isOnline = conversation.conversation_type !== "group" && 
+    activeUsers[conversation.participants[0].user_id]?.status === "online";
+
   return (
     <div
       onClick={handleSelectConversation}
-      className={ conversation.conversation_id == activeConversation.conversation_id ? "user selectUser" : "user"}
+      className={conversation.conversation_id == activeConversation.conversation_id ? "user selectUser" : "user"}
     >
       <div className="history-cont">
-        {conversation.conversation_type === "group" ? (
-          <div>{<Avatar>G</Avatar>}</div>
-        ) : (
-          <div>{<Avatar src={conversation.participants[0].avatar_url} />}</div>
-        )}
+        <div className="avatar-container">
+          {conversation.conversation_type === "group" ? (
+            <Avatar>G</Avatar>
+          ) : (
+            <>
+              <Avatar src={conversation.participants[0].avatar_url} />
+              <div className={`status-indicator ${isOnline ? 'status-online' : 'status-offline'}`} />
+            </>
+          )}
+        </div>
         <div>
           <p className="name">{conversation.conversation_name}</p>
           <p className="chat">

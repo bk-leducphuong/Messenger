@@ -48,10 +48,25 @@ const io = new Server(server, {
   },
 });
 
+// Track online users
+const onlineUsers = new Map();
+
 io.on("connection", (socket) => {
-  socket.on("setup", (user) => {
-    socket.join(user.user_id);
-    socket.emit("connected");
+
+  // Add user:activity handler
+  socket.on("user:activity", ({ userId, status }) => {
+    if (status === 'online') {
+      onlineUsers.set(userId, socket.id);
+    } else {
+      onlineUsers.delete(userId);
+    }
+
+    // Broadcast user status to all connected clients
+    io.emit("user:status", {
+      userId,
+      status,
+      timestamp: new Date().toISOString()
+    });
   });
 
   socket.on("join conversation", (conversationId) => {
