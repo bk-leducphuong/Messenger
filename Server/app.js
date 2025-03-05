@@ -26,10 +26,12 @@ app.use(cookieParser());
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use("/api/search", searchRoutes);
 
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, async () => {
