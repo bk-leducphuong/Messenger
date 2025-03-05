@@ -18,6 +18,11 @@ export const searchUsersAndConversations = async (req, res) => {
     // Search for conversations
     const conversations = await Conversation.findAll({
       attributes: ["conversation_id", "conversation_name", "conversation_type"],
+      where: {
+        conversation_name: {
+          [Op.like]: `%${query}%`,
+        },
+      },
       include: [
         {
           model: ConversationParticipant,
@@ -25,12 +30,7 @@ export const searchUsersAndConversations = async (req, res) => {
             user_id: req.user.user_id,
           },
         },
-      ],
-      where: {
-        conversation_name: {
-          [Op.like]: `%${query}%`,
-        },
-      },
+      ],  
     });
 
     return res.status(200).json({

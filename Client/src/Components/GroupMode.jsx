@@ -8,8 +8,7 @@ import MuiAlert from "@mui/material/Alert";
 import { useDispatch, useSelector } from "react-redux";
 import { LightTooltip } from "./SideNavbar";
 import { ColorButton } from "../pages/Login";
-import { makeSearchApi } from "../redux/searching/action";
-import { SearchComp } from "./SearchComp";
+// import { makeSearchApi } from "../redux/search/action";
 import { makeNewGroup } from "../redux/recentChat/action";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -77,7 +76,7 @@ export default function CustomizedDialogs() {
       if (ref.current) clearTimeout(ref.current);
       setSearch(true);
       ref.current = setTimeout(() => {
-        dispatch(makeSearchApi(e.target.value));
+        // dispatch(makeSearchApi(e.target.value));
       }, 1000);
     };
   };

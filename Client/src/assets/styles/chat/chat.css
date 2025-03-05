@@ -30,7 +30,14 @@
   background-color: inherit;
   width: 87%;
   padding: 10px;
-  font-size: 17px;
+  font-size: 15px;
+}
+
+.no-results {
+  color: #495057;
+  font-family: "Public Sans", sans-serif;
+  font-weight: 600;
+  margin-left: 20px;
 }
 
 /* Notification styles */

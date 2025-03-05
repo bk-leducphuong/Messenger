@@ -5,7 +5,7 @@ import { authReducer } from "./auth/reducer";
 import { conversationReducer } from "./chatting/reducer";
 import { notyficationReducer } from "./notification/reducer";
 import { recentChatReducer } from "./recentChat/reducer";
-import { searchReducer } from "./searching/reducer";
+import { searchReducer } from "./search/reducer";
 import { activeUserReducer } from './activeUser/reducer';
 
 const persistConfig = {

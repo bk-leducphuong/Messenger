@@ -6,26 +6,23 @@ import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
 import { Avatar, Badge } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { makeSearchApi } from "../redux/searching/action";
 import { accessChat, getAllConversations } from "../redux/recentChat/action";
 import { selectConversation } from "../redux/chatting/action";
-import { SearchComp } from "../components/SearchComp";
 import { NotificationComp } from "../components/NotificationComp";
 import { setUserActive } from "../redux/activeUser/action";
+import { searchUsersAndConversations } from '../redux/search/action';
 
 export const MyChat = ({ socket }) => {
-  // state component
   const [search, setSearch] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState(new Map());
-
-  // redux store
-  const { search_result, loading, error } = useSelector(
+  
+  // Update Redux selectors
+  const { users, conversations, loading: searchLoading } = useSelector(
     (store) => store.search
   );
-  const { allConversations, loading: chatLoading } = useSelector( // recent_chat = {id, }
+  const { allConversations, loading: chatLoading } = useSelector(
     (store) => store.recentChat
   );
-  const {  activeConversation } = useSelector((store) => store.conversation);
+  const { activeConversation } = useSelector((store) => store.conversation);
   const { notification, unseenmsg } = useSelector(
     (store) => store.notification
   );
@@ -53,19 +50,13 @@ export const MyChat = ({ socket }) => {
 
   // handle search action when user type in search bar
   const ref = useRef();
-  const handleQuery = (e) => {
-    let id;
-    return function (e) {
-      if (!e.target.value) {
-        setSearch(false);
-        return;
-      }
-      if (ref.current) clearTimeout(ref.current);
-      setSearch(true);
-      ref.current = setTimeout(() => {
-        dispatch(makeSearchApi(e.target.value));
-      }, 1000);
-    };
+  const handleSearchQuery = (e) => {
+    if (!e.target.value.trim()) {
+      setSearch(false);
+      return;
+    }
+    setSearch(true);
+    dispatch(searchUsersAndConversations(e.target.value.trim()));
   };
 
   return (
@@ -73,43 +64,71 @@ export const MyChat = ({ socket }) => {
       <div>
         <div className="notification">
           <h2>Chats</h2>
-          {/* <NotificationsIcon /> */}
           <Badge badgeContent={notification} color="error">
             <NotificationComp />
           </Badge>
-          {/* <AddIcon /> */}
         </div>
         <div className="search-cont">
           <SearchIcon />
           <input
-            onChange={handleQuery()}
+            onChange={handleSearchQuery}
             type="text"
-            placeholder="Search users"
+            placeholder="Search users or conversations"
           />
         </div>
       </div>
       <div className="recent-chat">
-        <p className="Recent">Recent</p>
-        <div className="recent-user">
-          {search
-            ? search_result.map((el) => (
-                <SearchComp
-                  key={el.id}
-                  {...el}
-                  token={token}
-                  recent_chat={recent_chat}
-                  setSearch={setSearch}
-                />
-              ))
-            : !chatLoading &&
-              allConversations.map((conversation, index) => (
-                <ChatUserComp
-                  key={conversation.conversation_id}
-                  conversation={conversation}
-                  activeConversation={activeConversation}
-                />
-              ))}
-        </div>
+        {search ? (
+          <div className="search-results">
+            {searchLoading ? (
+              <div className="loading">Searching...</div>
+            ) : (
+              <>
+                {users.length > 0 && (
+                  <div className="search-section">
+                    <p className="Recent">Users</p>
+                    {users.map((user) => (
+                      <SearchUserComp
+                        key={user.user_id}
+                        user={user}
+                        setSearch={setSearch}
+                      />
+                    ))}
+                  </div>
+                )}
+                {conversations.length > 0 && (
+                  <div className="search-section">
+                    <p className="Recent">Conversations</p>
+                    {conversations.map((conversation) => (
+                      <ChatUserComp
+                        key={conversation.conversation_id}
+                        conversation={conversation}
+                        activeConversation={activeConversation}
+                      />
+                    ))}
+                  </div>
+                )}
+                {users.length === 0 && conversations.length === 0 && (
+                  <div className="no-results">No results found</div>
+                )}
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            <p className="Recent">Recent</p>
+            <div className="recent-user">
+              {!chatLoading &&
+                allConversations.map((conversation) => (
+                  <ChatUserComp
+                    key={conversation.conversation_id}
+                    conversation={conversation}
+                    activeConversation={activeConversation}
+                  />
+                ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -165,6 +184,33 @@ const ChatUserComp = ({ conversation, activeConversation }) => {
           ""
         )}
         <p className="unseen-chat">5</p>
+      </div>
+    </div>
+  );
+};
+
+// Add new SearchUserComp for displaying user search results
+const SearchUserComp = ({ user, setSearch }) => {
+  const dispatch = useDispatch();
+
+  const handleSelectUser = async () => {
+    try {
+      await dispatch(accessChat(user.user_id));
+      setSearch(false);
+    } catch (error) {
+      console.error('Error accessing chat:', error);
+    }
+  };
+
+  return (
+    <div onClick={handleSelectUser} className="user">
+      <div className="history-cont">
+        <div className="avatar-container">
+          <Avatar src={user.avatar_url} />
+        </div>
+        <div>
+          <p className="name">{user.username}</p>
+        </div>
       </div>
     </div>
   );
