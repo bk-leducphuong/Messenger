@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { Server } from 'socket.io';
-import sequelize from './config/db.js';
+import { sequelize } from './model/index.js';
 
 // Configure environment variables
 if (process.env.NODE_ENV !== "production") {
@@ -81,7 +81,7 @@ io.on("connection", (socket) => {
 
   // Handle typing event
   socket.on("typing:start", ({ conversationId, user }) => {
-    console.log("typing:start", { conversationId, user });
+    // console.log("typing:start", { conversationId, user });
     // Broadcast to all users in the conversation room except sender
     socket.to(conversationId).emit("typing:update", {
       conversationId,

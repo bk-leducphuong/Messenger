@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
-import User from "../model/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { User } from "../model/index.js";
 if (process.env.NODE_ENV !== "production") {
   dotenv.config({ path: ".env.development" });
 } else {

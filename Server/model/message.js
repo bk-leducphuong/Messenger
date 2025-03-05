@@ -59,7 +59,13 @@ const Message = sequelize.define(
   },
   {
     timestamps: false,
+    indexes: [
+      {
+        fields: ['conversation_id', 'sender_id']
+      }
+    ]
   }
 );
+
 
 export default Message;

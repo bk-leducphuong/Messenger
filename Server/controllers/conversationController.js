@@ -1,8 +1,5 @@
-import ConversationParticipant from '../model/conversationParticipant.js';
-import Conversation from '../model/conversation.js';
-import Message from '../model/message.js';
-import User from '../model/user.js';
 import { Op } from 'sequelize';
+import { Conversation, ConversationParticipant, Message, User } from '../model/index.js';
 
 export const createNewConversation = async (req, res) => {
   const { conversation_name, conversation_type } = req.body;

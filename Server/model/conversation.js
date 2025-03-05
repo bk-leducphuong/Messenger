@@ -29,7 +29,7 @@ const Conversation = sequelize.define(
     },
   },
   {
-    sequelize,
+    modelName: 'conversation',
     timestamps: false,
   }
 );

@@ -38,9 +38,14 @@ const ConversationParticipant = sequelize.define(
     },
   },
   {
-    sequelize,
+    modelName: 'conversation_participant',
     timestamps: false,
-    primaryKey: ["conversation_id", "user_id"],
+    indexes: [
+      {
+        unique: true,
+        fields: ['conversation_id', 'user_id']
+      }
+    ]
   }
 );
 

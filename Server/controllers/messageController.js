@@ -1,5 +1,4 @@
-import Message from '../model/message.js';
-
+import { Message } from '../model/index.js';
 export const sendMessage = async (req, res) => {
     try {
         const { conversationId, messageType, messageText, fileUrl } = req.body;

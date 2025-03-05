@@ -1,6 +1,6 @@
-import { Op } from 'sequelize';
-import User from '../model/user.js';
-import Conversation from '../model/conversation.js';
+import { Op } from "sequelize";
+import { User, Conversation, ConversationParticipant } from "../model/index.js";
+
 
 export const searchUsersAndConversations = async (req, res) => {
   try {
@@ -10,24 +10,35 @@ export const searchUsersAndConversations = async (req, res) => {
     const users = await User.findAll({
       where: {
         username: { [Op.like]: `%${query}%` },
-        user_id: { [Op.ne]: req.user.user_id } // Exclude current user
+        user_id: { [Op.ne]: req.user.user_id }, // Exclude current user
       },
-      attributes: ['user_id', 'username', 'avatar_url'] // Only return necessary fields
-    });
+      attributes: ["user_id", "username", "avatar_url"], // Only return necessary fields
+    }); 
 
     // Search for conversations
     const conversations = await Conversation.findAll({
+      attributes: ["conversation_id", "conversation_name", "conversation_type"],
+      include: [
+        {
+          model: ConversationParticipant,
+          where: {
+            user_id: req.user.user_id,
+          },
+        },
+      ],
       where: {
-        conversation_name: { [Op.like]: `%${query}%` }
-      }
+        conversation_name: {
+          [Op.like]: `%${query}%`,
+        },
+      },
     });
 
     return res.status(200).json({
       users,
-      conversations
+      conversations,
     });
   } catch (error) {
-    console.error('Search error:', error);
+    console.error("Search error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
