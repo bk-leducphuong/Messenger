@@ -105,4 +105,34 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected:");
   });
+
+  // Handle call initiation
+  socket.on('call:start', ({ caller, offer, callType, receiverId }) => {
+    socket.to(receiverId).emit('call:incoming', {
+      offer,
+      callType,
+      callerId: caller.user_id,
+      callerName: caller.username
+    });
+  });
+
+  // Handle call acceptance
+  socket.on('call:accept', ({ answer, callerId }) => {
+    socket.to(callerId).emit('call:accepted', { answer });
+  });
+
+  // Handle call rejection
+  socket.on('call:reject', ({ callerId }) => {
+    socket.to(callerId).emit('call:rejected');
+  });
+
+  // Handle call end
+  socket.on('call:end', ({ receiverId }) => {
+    socket.to(receiverId).emit('call:ended');
+  });
+
+  // Handle ICE candidates
+  socket.on('call:ice-candidate', ({ candidate, receiverId }) => {
+    socket.to(receiverId).emit('call:ice-candidate', { candidate });
+  });
 });
