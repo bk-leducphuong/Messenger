@@ -1,9 +1,6 @@
 import "../assets/styles/chat/chat.css";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useRef, useState } from "react";
-import Popover from "@mui/material/Popover";
-import Typography from "@mui/material/Typography";
 import { Avatar, Badge } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { accessChat, getAllConversations } from "../redux/recentChat/action";
@@ -11,6 +8,7 @@ import { selectConversation } from "../redux/chatting/action";
 import { NotificationComp } from "../components/NotificationComp";
 import { setUserActive } from "../redux/activeUser/action";
 import { searchUsersAndConversations } from '../redux/search/action';
+import { SearchUserComp } from "@/components/SearchComp";
 
 export const MyChat = ({ socket }) => {
   const [search, setSearch] = useState(false);
@@ -189,31 +187,6 @@ const ChatUserComp = ({ conversation, activeConversation }) => {
   );
 };
 
-// Add new SearchUserComp for displaying user search results
-const SearchUserComp = ({ user, setSearch }) => {
-  const dispatch = useDispatch();
 
-  const handleSelectUser = async () => {
-    try {
-      await dispatch(accessChat(user.user_id));
-      setSearch(false);
-    } catch (error) {
-      console.error('Error accessing chat:', error);
-    }
-  };
-
-  return (
-    <div onClick={handleSelectUser} className="user">
-      <div className="history-cont">
-        <div className="avatar-container">
-          <Avatar src={user.avatar_url} />
-        </div>
-        <div>
-          <p className="name">{user.username}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 

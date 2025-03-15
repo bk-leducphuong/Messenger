@@ -40,6 +40,7 @@ body {
 }
 
 .home-cont {
+  overflow-y: hidden;
   display: flex;
 }
 
@@ -93,10 +94,11 @@ body {
 }
 
 .sender-cont {
+  justify-content: space-around;
   display: flex;
   border-top: 1px solid #f0eff5;
   align-items: center;
-  padding-top: 15px;
+  /* padding-top: 15px; */
 }
 .react-input-emoji--container {
   border-radius: 0px !important;
@@ -105,7 +107,7 @@ body {
 }
 .send-message {
   max-height: 36px;
-  margin-top: 0px;
+  margin-top: 0px !important;
 }
 .react-input-emoji--input {
   max-height: 32px !important;

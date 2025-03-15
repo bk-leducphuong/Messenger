@@ -1,5 +1,6 @@
 /* Chat container styles */
 .mychat-cont {
+  overflow: hidden;
   color: #495057;
   width: 26%;
   height: 100vh;
