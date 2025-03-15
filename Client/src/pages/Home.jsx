@@ -7,6 +7,27 @@ import { SideNavbar } from "../components/SideNavbar";
 import { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
+// Function to update user status via API
+const updateUserStatusAPI = async (userId, status) => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update status");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating status:", error);
+  }
+};
+
 export const HomeComp = () => {
   const { user, loading, error } = useSelector((store) => store.user);
   const { activeConversation } = useSelector((store) => store.conversation);
@@ -20,34 +41,39 @@ export const HomeComp = () => {
     // Connect to socket server
     socketRef.current = io(import.meta.env.VITE_SOCKET_SERVER_URL);
 
-    socketRef.current.on("connect", () => {
+    socketRef.current.on("connect", async () => {
       console.log("Connected to socket server");
       setSocket(socketRef.current);
-    });
-    
-    // Send initial online status
-    socketRef.current.emit("user:activity", {
-      userId: user.user_id,
-      status: "online"
+
+      // Update status to online in both socket and database
+      socketRef.current.emit("user:activity", {
+        userId: user.user_id,
+        status: "online",
+      });
+      await updateUserStatusAPI(user.user_id, "online");
     });
 
     // Handle window close/refresh
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = async () => {
       socketRef.current?.emit("user:activity", {
         userId: user.user_id,
-        status: "offline"
+        status: "offline",
       });
+      await updateUserStatusAPI(user.user_id, "offline");
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (socketRef.current) {
+        // Update status to offline in both socket and database
         socketRef.current.emit("user:activity", {
           userId: user.user_id,
-          status: "offline"
+          status: "offline",
         });
+        // Note: We can't await this in the cleanup function
+        updateUserStatusAPI(user.user_id, "offline");
         socketRef.current.disconnect();
         setSocket(null);
       }

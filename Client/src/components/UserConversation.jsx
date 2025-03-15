@@ -13,7 +13,7 @@ export const UserConversation = ({ conversation, activeConversation }) => {
 
   // Get the participant's online status
   const isOnline = conversation.conversation_type !== "group" && 
-    activeUsers[conversation.participants[0].user_id]?.status === "online";
+    activeUsers[conversation.participants[0].user_id]?.status === "online" || conversation.participants[0].status === "online"
 
   return (
     <div
