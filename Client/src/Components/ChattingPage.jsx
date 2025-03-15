@@ -299,7 +299,6 @@ function InputContWithEmog({ user, conversationId, socket }) {
   const handleTyping = useCallback(
     debounce(() => {
       if (socket) {
-        console.log("typing:start", { conversationId, user });
         socket.emit("typing:start", { conversationId, user });
       }
     }, 500),
@@ -309,7 +308,7 @@ function InputContWithEmog({ user, conversationId, socket }) {
   // Add handler for stopping typing
   const handleStopTyping = useCallback(() => {
     if (socket) {
-      socket.emit("typing:stop", { conversationId });
+      socket.emit("typing:stop", { conversationId, user});
     }
   }, [socket, conversationId]);
 
