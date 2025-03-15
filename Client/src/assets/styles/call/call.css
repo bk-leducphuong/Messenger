@@ -1,0 +1,128 @@
+.call-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.call-container {
+  width: 100%;
+  max-width: 1200px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 70%;
+}
+
+.remote-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.local-video {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid white;
+}
+
+.call-info {
+  text-align: center;
+  color: white;
+  margin: 20px 0;
+}
+
+.caller-avatar {
+  width: 80px !important;
+  height: 80px !important;
+  margin-bottom: 10px;
+}
+
+.caller-name {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.call-status {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.call-controls {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.control-button {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  padding: 15px !important;
+}
+
+.end-call {
+  background: #ff4444 !important;
+}
+
+.incoming-call-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.incoming-call-container {
+  background: #1a1a1a;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.call-actions {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  justify-content: center;
+}
+
+.accept-call {
+  background: #44b700 !important;
+  color: white !important;
+}
+
+.reject-call {
+  background: #ff4444 !important;
+  color: white !important;
+}
+
+.call-type {
+  color: #fff;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}

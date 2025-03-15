@@ -6,7 +6,13 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import styled from "@emotion/styled";
 import SendIcon from "@mui/icons-material/Send";
 import InputEmoji from "react-input-emoji";
-import React, { useRef, createRef, useCallback, useEffect, useState } from "react";
+import React, {
+  useRef,
+  createRef,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { ChatlogicStyling, isSameSender } from "./ChatstyleLogic";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -16,6 +22,8 @@ import {
 import { sendMessage } from "../redux/chatting/action";
 import { addUnseenmsg } from "../redux/notification/action";
 import { debounce } from "lodash";
+import CallModal from "./CallModal";
+import IncomingCallModal from "./IncomingCallModal";
 
 export const ChattingPage = ({ socket }) => {
   const { user } = useSelector((store) => store.user);
@@ -25,6 +33,9 @@ export const ChattingPage = ({ socket }) => {
   const scrolldiv = createRef();
   const dispatch = useDispatch();
   const [typingUsers, setTypingUsers] = useState({});
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [callType, setCallType] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
 
   // fetch messages
   useEffect(() => {
@@ -39,7 +50,10 @@ export const ChattingPage = ({ socket }) => {
     if (!socket) return;
 
     const messageHandler = (newMessage) => {
-      if (!activeConversation || activeConversation.conversation_id !== newMessage.conversation_id) {
+      if (
+        !activeConversation ||
+        activeConversation.conversation_id !== newMessage.conversation_id
+      ) {
         // Play notification sound
         handleNotyfy(newMessage);
       } else {
@@ -66,12 +80,12 @@ export const ChattingPage = ({ socket }) => {
     if (!socket) return;
 
     socket.on("typing:update", ({ userId, userName, isTyping }) => {
-      setTypingUsers(prev => ({
+      setTypingUsers((prev) => ({
         ...prev,
         [userId]: {
           userName,
-          isTyping
-        }
+          isTyping,
+        },
       }));
     });
 
@@ -80,10 +94,85 @@ export const ChattingPage = ({ socket }) => {
     };
   }, [socket]);
 
+  // Add new useEffect for call handling
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for incoming calls
+    socket.on("call:incoming", ({ offer, callType, callerId, callerName }) => {
+      setIncomingCall({
+        offer,
+        callType,
+        callerId,
+        callerName,
+      });
+    });
+
+    // Listen for call ended
+    socket.on("call:ended", () => {
+      setIsCallModalOpen(false);
+      setIncomingCall(null);
+    });
+
+    return () => {
+      socket.off("call:incoming");
+      socket.off("call:ended");
+    };
+  }, [socket]);
+
+  const handleAcceptCall = async () => {
+    try {
+      // Get user media
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: incomingCall.callType === 'video'
+      });
+
+      // Create peer connection
+      const peerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+
+      // Add stream
+      stream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, stream);
+      });
+
+      // Set remote description (offer)
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
+
+      // Create answer
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      // Send answer to caller
+      socket.emit('call:accept', {
+        answer,
+        callerId: incomingCall.callerId
+      });
+
+      // Open call modal
+      setCallType(incomingCall.callType);
+      setIsCallModalOpen(true);
+      setIncomingCall(null);
+
+    } catch (error) {
+      console.error('Error accepting call:', error);
+      handleRejectCall();
+    }
+  };
+
+  const handleRejectCall = () => {
+    if (incomingCall) {
+      socket.emit('call:reject', { callerId: incomingCall.callerId });
+      setIncomingCall(null);
+    }
+  };
+
   const getTypingIndicator = () => {
-    const typing = Object.values(typingUsers).filter(user => user.isTyping);
+    const typing = Object.values(typingUsers).filter((user) => user.isTyping);
     if (typing.length === 0) return null;
-    
+
     if (typing.length === 1) {
       return `${typing[0].userName} is typing...`;
     }
@@ -94,91 +183,118 @@ export const ChattingPage = ({ socket }) => {
     dispatch(addUnseenmsg(newMessage));
   };
 
+  const handleVideoCall = () => {
+    setCallType("video");
+    setIsCallModalOpen(true);
+  };
+
+  const handleAudioCall = () => {
+    setCallType("audio");
+    setIsCallModalOpen(true);
+  };
+
   return (
-    <div className="chattingpage">
-      <div className="top-header">
-        <div className="user-header">
-          <Avatar
-            src={
-              activeConversation.conversation_type == "group"
-                ? "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-                : activeConversation.participants[0].avatar_url
-            }
-          />
-          <p className="user-name">{activeConversation.conversation_name}</p>
-        </div>
-        <div>
-          <div className="user-fet">
-            <SearchIcon />
-            <CallIcon />
-            <VideoCallIcon />
-            <MoreHorizIcon />
+    <>
+      <div className="chattingpage">
+        <div className="top-header">
+          <div className="user-header">
+            <Avatar
+              src={
+                activeConversation.conversation_type == "group"
+                  ? "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                  : activeConversation.participants[0].avatar_url
+              }
+            />
+            <p className="user-name">{activeConversation.conversation_name}</p>
+          </div>
+          <div>
+            <div className="user-fet">
+              <SearchIcon />
+              <CallIcon onClick={handleAudioCall} />
+              <VideoCallIcon onClick={handleVideoCall} />
+              <MoreHorizIcon />
+            </div>
           </div>
         </div>
-      </div>
-      <div ref={scrolldiv} className="live-chat">
-        {messages.map((message, index) => (
-          <div
-            key={message.message_id || index}
-            className={
-              message.sender_id != user.user_id
-                ? "rihgtuser-chat"
-                : "leftuser-chat"
-            }
-          >
+        <div ref={scrolldiv} className="live-chat">
+          {messages.map((message, index) => (
             <div
+              key={message.message_id || index}
               className={
-                message.sender_id != user.user_id ? "right-avt" : "left-avt"
+                message.sender_id != user.user_id
+                  ? "rihgtuser-chat"
+                  : "leftuser-chat"
               }
             >
               <div
-                className={ChatlogicStyling(message.sender_id, user.user_id)}
+                className={
+                  message.sender_id != user.user_id ? "right-avt" : "left-avt"
+                }
               >
-                <p>{message.message_text}</p>
-                <p className="time chat-time">
-                  {new Date(message.created_at).getHours() +
-                    ":" +
-                    new Date(message.created_at).getMinutes()}
-                </p>
-              </div>
+                <div
+                  className={ChatlogicStyling(message.sender_id, user.user_id)}
+                >
+                  <p>{message.message_text}</p>
+                  <p className="time chat-time">
+                    {new Date(message.created_at).getHours() +
+                      ":" +
+                      new Date(message.created_at).getMinutes()}
+                  </p>
+                </div>
 
-              {isSameSender(messages, index) ? (
-                <Avatar
-                  src={
-                    message.sender_id != user.user_id
-                      ? "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-                      : user.avatar_url
-                  }
-                />
-              ) : (
-                <div className="blank-div"></div>
-              )}
+                {isSameSender(messages, index) ? (
+                  <Avatar
+                    src={
+                      message.sender_id != user.user_id
+                        ? "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                        : user.avatar_url
+                    }
+                  />
+                ) : (
+                  <div className="blank-div"></div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      
-      {/* Add typing indicator above the input */}
-      {getTypingIndicator() && (
-        <div className="typing-indicator">
-          {getTypingIndicator()}
+          ))}
         </div>
-      )}
-      
-      <div className="sender-cont">
-        <InputContWithEmog 
-          user={user} 
-          conversationId={activeConversation.conversation_id} 
-          socket={socket}
-        />
+
+        {/* Add typing indicator above the input */}
+        {getTypingIndicator() && (
+          <div className="typing-indicator">{getTypingIndicator()}</div>
+        )}
+
+        <div className="sender-cont">
+          <InputContWithEmog
+            user={user}
+            conversationId={activeConversation.conversation_id}
+            socket={socket}
+          />
+        </div>
       </div>
-    </div>
+
+      <CallModal
+        isOpen={isCallModalOpen}
+        callType={callType}
+        caller={user}
+        receiver={activeConversation.participants[0]}
+        onClose={() => setIsCallModalOpen(false)}
+        socket={socket}
+      />
+
+      <IncomingCallModal
+        isOpen={!!incomingCall}
+        callType={incomingCall?.callType}
+        callerName={incomingCall?.callerName}
+        onAccept={handleAcceptCall}
+        onReject={handleRejectCall}
+      />
+    </>
   );
 };
 function InputContWithEmog({ user, conversationId, socket }) {
   const [text, setText] = useState("");
   const dispatch = useDispatch();
-  
+
   // Add debounce to avoid too many typing events
   const handleTyping = useCallback(
     debounce(() => {
@@ -190,7 +306,7 @@ function InputContWithEmog({ user, conversationId, socket }) {
     [socket, conversationId, user]
   );
 
-   // Add handler for stopping typing
+  // Add handler for stopping typing
   const handleStopTyping = useCallback(() => {
     if (socket) {
       socket.emit("typing:stop", { conversationId });
