@@ -76,7 +76,6 @@ body {
   margin-right: 20px;
 }
 .live-chat {
-  /* border: 2px solid red; */
   padding: 20px;
   max-height: 77%;
   height: 77%;
@@ -98,7 +97,6 @@ body {
   display: flex;
   border-top: 1px solid #f0eff5;
   align-items: center;
-  /* padding-top: 15px; */
 }
 .react-input-emoji--container {
   border-radius: 0px !important;
@@ -125,14 +123,12 @@ body {
   display: flex;
 }
 .right-avt {
-  /* border: 2px solid red; */
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   gap: 10px;
 }
 .left-avt {
-  /* border: 2px solid black; */
   display: flex;
   align-items: center;
   gap: 10px;
@@ -163,7 +159,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* position: absolute; */
 }
 .start-msg div {
   display: flex;
@@ -186,7 +181,6 @@ body {
 svg {
   cursor: pointer;
 }
-
 
 .typing-indicator {
   padding: 8px 16px;
