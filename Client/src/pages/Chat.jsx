@@ -8,8 +8,8 @@ import { selectConversation } from "../redux/chatting/action";
 import { NotificationComp } from "../components/NotificationComp";
 import { setUserActive } from "../redux/activeUser/action";
 import { searchUsersAndConversations } from '../redux/search/action';
-import { SearchUserComp } from "@/components/SearchComp";
-import { UserConversation } from "@/components/UserConversation";
+import { SearchUserComp } from "../components/SearchComp";
+import { UserConversation } from "../components/UserConversation";
 
 export const MyChat = ({ socket }) => {
   const [search, setSearch] = useState(false);
