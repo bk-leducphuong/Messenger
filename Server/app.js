@@ -1,9 +1,9 @@
-import dotenv from 'dotenv';
-import cors from 'cors';
-import express from 'express';
-import cookieParser from 'cookie-parser';
-import { Server } from 'socket.io';
-import { sequelize } from './model/index.js';
+import dotenv from "dotenv";
+import cors from "cors";
+import express from "express";
+import cookieParser from "cookie-parser";
+import { Server } from "socket.io";
+import { sequelize } from "./model/index.js";
 
 // Configure environment variables
 if (process.env.NODE_ENV !== "production") {
@@ -13,20 +13,22 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const app = express();
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
 // Import routes
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import conversationRoutes from './routes/conversationRoutes.js';
-import searchRoutes from './routes/searchRoutes.js';
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import conversationRoutes from "./routes/conversationRoutes.js";
+import searchRoutes from "./routes/searchRoutes.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -38,7 +40,7 @@ const server = app.listen(PORT, async () => {
   try {
     await sequelize.sync({ force: false });
     console.log(`Server is listening on port ${PORT}`);
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
 });
@@ -54,10 +56,9 @@ const io = new Server(server, {
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
-
   // Add user:activity handler
   socket.on("user:activity", ({ userId, status }) => {
-    if (status === 'online') {
+    if (status === "online") {
       onlineUsers.set(userId, socket.id);
     } else {
       onlineUsers.delete(userId);
@@ -67,7 +68,7 @@ io.on("connection", (socket) => {
     io.emit("user:status", {
       userId,
       status,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   });
 
@@ -76,7 +77,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message:send", (message) => {
-    socket.in(`conversation:${message.conversation_id}`).emit("message:new", message);
+    socket
+      .in(`conversation:${message.conversation_id}`)
+      .emit("message:new", message);
   });
 
   // Handle typing event
@@ -87,10 +90,9 @@ io.on("connection", (socket) => {
       conversationId,
       userId: user.user_id,
       userName: user.username,
-      isTyping: true
+      isTyping: true,
     });
   });
-
 
   // Optional: Add typing stop event
   socket.on("typing:stop", ({ conversationId, user }) => {
@@ -98,7 +100,7 @@ io.on("connection", (socket) => {
       conversationId,
       userId: user.user_id,
       userName: user.username,
-      isTyping: false
+      isTyping: false,
     });
   });
 
@@ -107,32 +109,47 @@ io.on("connection", (socket) => {
   });
 
   // Handle call initiation
-  socket.on('call:start', ({ caller, offer, callType, receiverId }) => {
-    socket.to(receiverId).emit('call:incoming', {
-      offer,
-      callType,
-      callerId: caller.user_id,
-      callerName: caller.username
-    });
+  socket.on("call:start", ({ caller, offer, callType, receiverId }) => {
+    const recieverSocketId = onlineUsers.get(receiverId);
+    if (recieverSocketId) {
+      socket.to(recieverSocketId).emit("call:incoming", {
+        offer,
+        callType,
+        callerId: caller.user_id,
+        callerName: caller.username,
+      });
+    }
   });
 
   // Handle call acceptance
-  socket.on('call:accept', ({ answer, callerId }) => {
-    socket.to(callerId).emit('call:accepted', { answer });
+  socket.on("call:accept", ({ answer, callerId }) => {
+    const callerSocketId = onlineUsers.get(callerId);
+    if (callerSocketId) {
+      socket.to(callerSocketId).emit("call:accepted", { answer });
+    }
   });
 
   // Handle call rejection
-  socket.on('call:reject', ({ callerId }) => {
-    socket.to(callerId).emit('call:rejected');
+  socket.on("call:reject", ({ callerId }) => {
+    const callerSocketId = onlineUsers.get(callerId);
+    if (callerSocketId) {
+      socket.to(callerSocketId).emit("call:rejected");
+    }
   });
 
   // Handle call end
-  socket.on('call:end', ({ receiverId }) => {
-    socket.to(receiverId).emit('call:ended');
+  socket.on("call:end", ({ receiverId }) => {
+    const recieverSocketId = onlineUsers.get(receiverId);
+    if (recieverSocketId) {
+      socket.to(recieverSocketId).emit("call:ended");
+    }
   });
 
   // Handle ICE candidates
-  socket.on('call:ice-candidate', ({ candidate, receiverId }) => {
-    socket.to(receiverId).emit('call:ice-candidate', { candidate });
+  socket.on("call:ice-candidate", ({ candidate, receiverId }) => {
+    const recieverSocketId = onlineUsers.get(receiverId);
+    if (recieverSocketId) {
+      socket.to(recieverSocketId).emit("call:ice-candidate", { candidate });
+    }
   });
 });

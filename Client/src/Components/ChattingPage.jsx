@@ -114,6 +114,10 @@ export const ChattingPage = ({ socket }) => {
       setIncomingCall(null);
     });
 
+    socket.on("call:rejected", () => {
+      setIsCallModalOpen(false);
+    });
+
     return () => {
       socket.off("call:incoming");
       socket.off("call:ended");
