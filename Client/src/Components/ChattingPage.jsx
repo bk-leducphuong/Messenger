@@ -22,8 +22,8 @@ import {
 import { sendMessage } from "../redux/chatting/action";
 import { addUnseenmsg } from "../redux/notification/action";
 import { debounce } from "lodash";
-import CallModal from "./CallModal";
-import IncomingCallModal from "./IncomingCallModal";
+import CallModal from "./call/CallModal";
+import IncomingCallModal from "./call/IncomingCallModal";
 
 export const ChattingPage = ({ socket }) => {
   const { user } = useSelector((store) => store.user);

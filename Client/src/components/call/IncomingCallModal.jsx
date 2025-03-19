@@ -2,7 +2,7 @@ import React from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-import '../assets/styles/call/call.css';
+import '../../assets/styles/call/call.css';
 
 const IncomingCallModal = ({ 
   isOpen, 
