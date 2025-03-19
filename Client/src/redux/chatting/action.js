@@ -1,3 +1,5 @@
+import { updateConversationWithNewMessage } from '../recentChat/action';
+
 export const SELECT_CONVERSATION = "SELECT_CONVERSATION";
 export const ADD_MESSAGE = "ADD_MESSAGE";
 export const MESSAGE_LOADING = "MESSAGE_LOADING";
@@ -45,6 +47,10 @@ export const sendMessageApi = (msg, socket) => async (dispatch) => {
 
     socket.emit("message:send", message);
 
+    // Update the conversation in recent chats
+    dispatch(updateConversationWithNewMessage(message));
+    
+    // Update the current conversation messages
     dispatch(sendMessage(message));
   } catch (err) {
     console.log(err.message);

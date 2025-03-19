@@ -5,7 +5,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
-import '../assets/styles/call/call.css';
+import '../../assets/styles/call/call.css';
 
 const CallModal = ({ 
   isOpen, 

@@ -20,7 +20,8 @@ import {
   sendMessageApi,
 } from "../redux/chatting/action";
 import { sendMessage } from "../redux/chatting/action";
-import { addUnseenmsg } from "../redux/notification/action";
+import { addUnseenMsg } from "../redux/notification/action";
+import { updateConversationWithNewMessage } from "../redux/recentChat/action";
 import { debounce } from "lodash";
 import CallModal from "./call/CallModal";
 import IncomingCallModal from "./call/IncomingCallModal";
@@ -54,10 +55,16 @@ export const ChattingPage = ({ socket }) => {
         !activeConversation ||
         activeConversation.conversation_id !== newMessage.conversation_id
       ) {
-        // Play notification sound
-        handleNotyfy(newMessage);
+        // Create and dispatch notification
+        handleNotificationForNewMessage(newMessage);
+        
+        // Update recent chat with new message
+        dispatch(updateConversationWithNewMessage(newMessage));
       } else {
         dispatch(sendMessage(newMessage));
+        
+        // Even when in the active conversation, update recent chat order
+        dispatch(updateConversationWithNewMessage(newMessage));
       }
     };
 
@@ -183,8 +190,24 @@ export const ChattingPage = ({ socket }) => {
     return `${typing.length} people are typing...`;
   };
 
-  const handleNotyfy = (newMessage) => {
-    dispatch(addUnseenmsg(newMessage));
+  const handleNotificationForNewMessage = (newMessage) => {
+    // Format the notification data to match what NotificationComp expects
+    const notificationData = {
+      sender: {
+        name: newMessage.sender_name || "Someone",
+      },
+      content: newMessage.message_text,
+      conversation_id: newMessage.conversation_id,
+      message_id: newMessage.message_id,
+      timestamp: newMessage.created_at,
+      // Also include any additional fields needed for the notification component
+    };
+    
+    // Play notification sound if needed
+    // You could add a sound element here
+    
+    // Dispatch action to add to unseen messages
+    dispatch(addUnseenMsg(notificationData));
   };
 
   const handleVideoCall = () => {

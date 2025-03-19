@@ -9,6 +9,7 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import styled from "@emotion/styled";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import CustomizedDialogs from "./GroupMode";
+import { Logout } from "@mui/icons-material";
 export const SideNavbar = () => {
   const { user, loading, error } = useSelector((store) => store.user);
 
@@ -33,12 +34,11 @@ export const SideNavbar = () => {
         <LightTooltip placement="top" title="Settings">
           <SettingsOutlinedIcon />
         </LightTooltip>
+        {/* <LightTooltip placement="top" title="Logout">
+          <Logout />
+        </LightTooltip> */}
       </div>
       <div className="bottom-icon">
-        <LanguageOutlinedIcon />
-        <LightTooltip placement="top" title="Dark/Light Mode">
-          <DarkModeOutlinedIcon />
-        </LightTooltip>
       </div>
     </div>
   );

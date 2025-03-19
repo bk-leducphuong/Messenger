@@ -1,6 +1,7 @@
 export const CONVERSATION_LOADING = "CONVERSATION_LOADING";
 export const CONVERSATION_ERROR = "CONVERSATION_ERROR";
 export const ADD_CONVERSATION = "ADD_CONVERSATION";
+export const UPDATE_CONVERSATION_WITH_NEW_MESSAGE = "UPDATE_CONVERSATION_WITH_NEW_MESSAGE";
 // export const NEW_CREATED_CONVERSATION = "NEW_CREATED_CONVERSATION";
 
 export const conversationLoading = (payload) => ({
@@ -13,6 +14,10 @@ export const conversationError = (payload) => ({
 });
 export const conversationResult = (payload) => ({
   type: ADD_CONVERSATION,
+  payload,
+});
+export const updateConversationWithNewMessage = (payload) => ({
+  type: UPDATE_CONVERSATION_WITH_NEW_MESSAGE,
   payload,
 });
 // export const newC = (payload) => ({

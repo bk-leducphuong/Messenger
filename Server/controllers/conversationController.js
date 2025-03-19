@@ -55,6 +55,17 @@ export const getAllConversation = async (req, res) => {
         latest_message: latestMessage,
       });
     }
+    
+    // Sort conversations by latest message time (newest first)
+    allConversations.sort((a, b) => {
+      // If conversation has no messages, put it at the end
+      if (!a.latest_message) return 1;
+      if (!b.latest_message) return -1;
+      
+      // Compare created_at timestamps (newest first)
+      return new Date(b.latest_message.created_at) - new Date(a.latest_message.created_at);
+    });
+    
     return res.status(200).json(allConversations);
   }catch(error) {
     console.error(error);

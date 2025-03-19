@@ -1,14 +1,30 @@
 import "../assets/styles/conversation/conversation.css";
-import { Avatar } from "@mui/material";
+import { Avatar, Badge } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { selectConversation } from "../redux/chatting/action";
+import { removeSeenMsg } from "../redux/notification/action";
 
 export const UserConversation = ({ conversation, activeConversation }) => {
   const { activeUsers } = useSelector((store) => store.activeUser);
-
+  const { unseenmsg } = useSelector((store) => store.notification);
+  
   const dispatch = useDispatch();
+  
+  // Count unseen messages for this conversation
+  const unseenCount = unseenmsg?.filter(
+    msg => msg.conversation_id === conversation.conversation_id
+  ).length || 0;
+  
   const handleSelectConversation = () => {
     dispatch(selectConversation(conversation));
+    
+    // Clear unseen messages for this conversation when selected
+    if (unseenCount > 0) {
+      const updatedUnseenMsgs = unseenmsg.filter(
+        msg => msg.conversation_id !== conversation.conversation_id
+      );
+      dispatch(removeSeenMsg(updatedUnseenMsgs));
+    }
   };
 
   // Get the participant's online status
@@ -52,7 +68,9 @@ export const UserConversation = ({ conversation, activeConversation }) => {
         ) : (
           ""
         )}
-        <p className="unseen-chat">5</p>
+        {unseenCount > 0 && (
+          <div className="unseen-chat">{unseenCount}</div>
+        )}
       </div>
     </div>
   );
