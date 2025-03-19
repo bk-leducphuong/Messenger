@@ -25,6 +25,7 @@ import { updateConversationWithNewMessage } from "../redux/recentChat/action";
 import { debounce } from "lodash";
 import CallModal from "./call/CallModal";
 import IncomingCallModal from "./call/IncomingCallModal";
+import { initNotificationSound, playNotificationSound } from "../utils/soundUtils";
 
 export const ChattingPage = ({ socket }) => {
   const { user } = useSelector((store) => store.user);
@@ -37,6 +38,18 @@ export const ChattingPage = ({ socket }) => {
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [callType, setCallType] = useState(null);
   const [incomingCall, setIncomingCall] = useState(null);
+
+  // Initialize notification sound when component mounts
+  useEffect(() => {
+    initNotificationSound().catch(error => {
+      console.warn("Failed to initialize notification sound:", error);
+    });
+    
+    // Cleanup when component unmounts
+    return () => {
+      // Any necessary cleanup
+    };
+  }, []);
 
   // fetch messages
   useEffect(() => {
@@ -200,11 +213,16 @@ export const ChattingPage = ({ socket }) => {
       conversation_id: newMessage.conversation_id,
       message_id: newMessage.message_id,
       timestamp: newMessage.created_at,
-      // Also include any additional fields needed for the notification component
     };
     
     // Play notification sound if needed
-    // You could add a sound element here
+    playNotificationSound().catch(error => {
+      console.log("Could not play notification sound:", error.message);
+      // Try to initialize and play again
+      initNotificationSound()
+        .then(() => playNotificationSound())
+        .catch(e => console.error("Failed to initialize and play sound:", e));
+    });
     
     // Dispatch action to add to unseen messages
     dispatch(addUnseenMsg(notificationData));
