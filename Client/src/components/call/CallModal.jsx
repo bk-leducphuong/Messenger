@@ -6,6 +6,11 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import '../../assets/styles/call/call.css';
+import { 
+  initOutgoingCallSound, 
+  playOutgoingCallSound, 
+  stopOutgoingCallSound 
+} from '../../utils/soundUtils';
 
 const CallModal = ({ 
   isOpen, 
@@ -19,9 +24,25 @@ const CallModal = ({
   const [remoteStream, setRemoteStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isPlayingCallSound, setIsPlayingCallSound] = useState(false);
+  const [callStatus, setCallStatus] = useState('Calling...');
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
   const peerConnection = useRef(null);
+
+  // Initialize call sound
+  useEffect(() => {
+    if (isOpen) {
+      initOutgoingCallSound(true).catch(error => {
+        console.error("Failed to initialize outgoing call sound:", error);
+      });
+    }
+    
+    return () => {
+      stopOutgoingCallSound();
+      setIsPlayingCallSound(false);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -31,6 +52,22 @@ const CallModal = ({
       cleanupCall();
     };
   }, [isOpen]);
+
+  // Play outgoing call sound until connected
+  useEffect(() => {
+    if (isOpen && !remoteStream && !isPlayingCallSound) {
+      playOutgoingCallSound()
+        .then(() => {
+          setIsPlayingCallSound(true);
+        })
+        .catch(error => {
+          console.error("Error playing outgoing call sound:", error);
+        });
+    } else if ((remoteStream || !isOpen) && isPlayingCallSound) {
+      stopOutgoingCallSound();
+      setIsPlayingCallSound(false);
+    }
+  }, [isOpen, remoteStream, isPlayingCallSound]);
 
   const initializeCall = async () => {
     try {
@@ -63,9 +100,14 @@ const CallModal = ({
       // Handle incoming remote stream
       peerConnection.current.ontrack = (event) => {
         setRemoteStream(event.streams[0]);
+        setCallStatus('Connected');
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = event.streams[0];
         }
+        
+        // Stop calling sound when connected
+        stopOutgoingCallSound();
+        setIsPlayingCallSound(false);
       };
 
       // Handle ICE candidates
@@ -88,6 +130,19 @@ const CallModal = ({
       // Handle call acceptance
       socket.on('call:accepted', async ({ answer }) => {
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+        setCallStatus('Connecting...');
+      });
+      
+      // Handle call rejection
+      socket.on('call:rejected', () => {
+        setCallStatus('Call rejected');
+        stopOutgoingCallSound();
+        setIsPlayingCallSound(false);
+        
+        // Close the call modal after a short delay
+        setTimeout(() => {
+          onClose();
+        }, 1500);
       });
 
       // Create and send offer
@@ -103,11 +158,16 @@ const CallModal = ({
 
     } catch (error) {
       console.error('Error initializing call:', error);
+      stopOutgoingCallSound();
+      setIsPlayingCallSound(false);
       onClose();
     }
   };
 
   const cleanupCall = () => {
+    stopOutgoingCallSound();
+    setIsPlayingCallSound(false);
+    
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
     }
@@ -168,9 +228,7 @@ const CallModal = ({
         <div className="call-info">
           <Avatar src={receiver.avatar_url} className="caller-avatar" />
           <div className="caller-name">{receiver.username}</div>
-          <div className="call-status">
-            {remoteStream ? 'Connected' : 'Connecting...'}
-          </div>
+          <div className="call-status">{callStatus}</div>
         </div>
 
         <div className="call-controls">
