@@ -1,4 +1,4 @@
-import { Avatar, Button } from "@mui/material";
+import { Avatar, Button, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CallIcon from "@mui/icons-material/Call";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
@@ -26,6 +26,8 @@ import { debounce } from "lodash";
 import CallModal from "./call/CallModal";
 import IncomingCallModal from "./call/IncomingCallModal";
 import { initNotificationSound, playNotificationSound } from "../utils/soundUtils";
+import ImageIcon from "@mui/icons-material/Image";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export const ChattingPage = ({ socket }) => {
   const { user } = useSelector((store) => store.user);
@@ -267,7 +269,7 @@ export const ChattingPage = ({ socket }) => {
               key={message.message_id || index}
               className={
                 message.sender_id != user.user_id
-                  ? "rihgtuser-chat"
+                  ? "rightuser-chat"
                   : "leftuser-chat"
               }
             >
@@ -279,7 +281,19 @@ export const ChattingPage = ({ socket }) => {
                 <div
                   className={ChatlogicStyling(message.sender_id, user.user_id)}
                 >
-                  <p>{message.message_text}</p>
+                  {message.message_type === 'image' ? (
+                    <>
+                      <img 
+                        src={message.fileUrl} 
+                        alt="Message attachment" 
+                        className="image-message" 
+                        onClick={() => window.open(message.fileUrl, '_blank')}
+                      />
+                      {message.message_text && <p>{message.message_text}</p>}
+                    </>
+                  ) : (
+                    <p>{message.message_text}</p>
+                  )}
                   <p className="time chat-time">
                     {new Date(message.created_at).getHours() +
                       ":" +
@@ -338,7 +352,11 @@ export const ChattingPage = ({ socket }) => {
 };
 function InputContWithEmog({ user, conversationId, socket }) {
   const [text, setText] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
   const dispatch = useDispatch();
+  const { imageUploading } = useSelector((store) => store.conversation);
 
   // Add debounce to avoid too many typing events
   const handleTyping = useCallback(
@@ -353,39 +371,74 @@ function InputContWithEmog({ user, conversationId, socket }) {
   // Add handler for stopping typing
   const handleStopTyping = useCallback(() => {
     if (socket) {
-      socket.emit("typing:stop", { conversationId, user});
+      socket.emit("typing:stop", { conversationId, user });
     }
   }, [socket, conversationId]);
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && (file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/gif")) {
+      setSelectedImage(file);
+      
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    } else {
+      alert("Please select a valid image file (JPEG, PNG, or GIF)");
+    }
+  };
+
+  const handleImageUploadClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleCancelImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   function handleOnEnter(text) {
-    dispatch(
-      sendMessageApi(
-        {
-          messageText: text,
-          conversationId: conversationId,
-          messageType: "text",
-          fileUrl: null,
-        },
-        socket
-      )
-    );
-    handleStopTyping();
+    if (text.trim() || selectedImage) {
+      dispatch(
+        sendMessageApi(
+          {
+            messageText: text,
+            conversationId: conversationId,
+            messageType: selectedImage ? "image" : "text",
+            fileUrl: null,
+            file: selectedImage,
+          },
+          socket
+        )
+      );
+      handleStopTyping();
+      setSelectedImage(null);
+      setImagePreview(null);
+    }
   }
 
   function handleChatClick() {
-    dispatch(
-      sendMessageApi(
-        {
-          messageText: text,
-          conversationId: conversationId,
-          messageType: "text",
-          fileUrl: null,
-        },
-        socket
-      )
-    );
-    setText("");
-    handleStopTyping();
+    if (text.trim() || selectedImage) {
+      dispatch(
+        sendMessageApi(
+          {
+            messageText: text || "",
+            conversationId: conversationId,
+            messageType: selectedImage ? "image" : "text",
+            fileUrl: null,
+            file: selectedImage,
+          },
+          socket
+        )
+      );
+      setText("");
+      handleStopTyping();
+      setSelectedImage(null);
+      setImagePreview(null);
+    }
   }
 
   const handleTextChange = (newText) => {
@@ -395,7 +448,29 @@ function InputContWithEmog({ user, conversationId, socket }) {
 
   return (
     <>
+      {imagePreview && (
+        <div className="image-preview-container">
+          <div className="image-preview">
+            <img src={imagePreview} alt="Selected" />
+            <button className="cancel-image-btn" onClick={handleCancelImage}>×</button>
+          </div>
+        </div>
+      )}
       <div className="search-cont send-message">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+          accept="image/jpeg,image/png,image/gif"
+        />
+        <IconButton 
+          onClick={handleImageUploadClick}
+          disabled={imageUploading}
+          className="image-upload-btn"
+        >
+          {imageUploading ? <CircularProgress size={24} /> : <ImageIcon />}
+        </IconButton>
         <InputEmoji
           value={text}
           onChange={handleTextChange}
@@ -409,6 +484,7 @@ function InputContWithEmog({ user, conversationId, socket }) {
         onClick={handleChatClick}
         variant="contained"
         endIcon={<SendIcon />}
+        disabled={imageUploading}
       ></ColorButton>
     </>
   );

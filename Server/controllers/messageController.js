@@ -1,8 +1,10 @@
 import { Message } from '../model/index.js';
+import upload from '../config/awsConfig.js';
+
 export const sendMessage = async (req, res) => {
     try {
         const { conversationId, messageType, messageText, fileUrl } = req.body;
-        if (!conversationId || !messageType || !messageText) {
+        if (!conversationId || !messageType || (!messageText && !fileUrl)) {
             return res.status(400).send({message: "Missing required information!"})
         }
 
@@ -17,6 +19,42 @@ export const sendMessage = async (req, res) => {
         return res.status(201).json(messageObj);
     } catch (error) {
         return res.status(500).send({message: "Internal Server Error!"});
+    }
+};
+
+export const uploadImage = async (req, res) => {
+    try {
+        // Use multer upload middleware
+        upload.single('image')(req, res, async (err) => {
+            if (err) {
+                console.error('Error uploading image:', err);
+                return res.status(400).json({ 
+                    success: false, 
+                    message: err.message 
+                });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "No file uploaded" 
+                });
+            }
+
+            // The file has been uploaded to S3
+            // req.file.location contains the S3 URL of the uploaded file
+            return res.status(200).json({
+                success: true,
+                imageUrl: req.file.location,
+                message: "Image uploaded successfully"
+            });
+        });
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error!" 
+        });
     }
 };
 

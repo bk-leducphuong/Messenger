@@ -13,6 +13,7 @@ router.post("/:conversationId/participants", authenticate, conversationControlle
 router.delete("/:conversationId/participants/:userId", authenticate, conversationController.removeParticipant); // remove participants from group
 
 router.post("/:conversationId/messages", authenticate, messageController.sendMessage); // send message
+router.post("/messages/upload", authenticate, messageController.uploadImage); // upload image
 router.get("/:conversationId/messages", authenticate, messageController.getMessages); // get messages
 router.put("/:conversationId/messages/:messageId", authenticate, messageController.editMessage); // edit message
 router.delete("/:conversationId/messages/:messageId", authenticate, messageController.deleteMessage); // delete message

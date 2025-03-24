@@ -4,6 +4,7 @@ import {
   MESSAGE_LOADING,
   SELECT_CONVERSATION,
   SEND_MESSAGE,
+  IMAGE_UPLOAD_LOADING,
   // SET_TYPING_STATUS,
 } from "./action";
 
@@ -12,6 +13,7 @@ const initState = {
   messages: [],
   loading: false,
   error: false,
+  imageUploading: false,
   // typingUsers: {},
 };
 export const conversationReducer = (store = initState, { type, payload }) => {
@@ -36,6 +38,8 @@ export const conversationReducer = (store = initState, { type, payload }) => {
       return { ...store, loading: payload };
     case MESSAGE_ERROR:
       return { ...store, error: payload };
+    case IMAGE_UPLOAD_LOADING:
+      return { ...store, imageUploading: payload };
     // case SET_TYPING_STATUS:
     //   return {
     //     ...store,
