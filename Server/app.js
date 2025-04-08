@@ -35,8 +35,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/search", searchRoutes);
 
-const PORT = process.env.PORT || 3001;
-const server = app.listen(PORT, async () => {
+const PORT = parseInt(process.env.PORT) || 3001;
+const HOST_NAME = process.env.HOST_NAME || "localhost";
+const server = app.listen(PORT, HOST_NAME, async () => {
   try {
     await sequelize.sync({ force: false });
     console.log(`Server is listening on port ${PORT}`);

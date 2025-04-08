@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1
+      POSTGRES_DB: messenger
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: 
+      context: ./Server
+      args:
+        ENV_FILE: .env.development
+    environment:
+      - HOSTNAME=0.0.0.0
+      - NODE_ENV=development
+      - PG_HOST=db
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./Server:/app
+      - /app/node_modules
+    command: npm run dev
+
+  frontend:
+    build:     
+      context: ./Client
+      args:
+        ENV_FILE: .env.development
+    volumes:
+      - ./Client:/app
+      - /app/node_modules
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    command: npm run dev
+
+volumes:
+  pgdata:

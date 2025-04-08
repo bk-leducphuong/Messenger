@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const sequelize = new Sequelize(process.env.PG_DATABASE, process.env.PG_USER, process.env.PG_PASSWORD, {
-  host: process.env.PG_HOST,
+  host: process.env.PG_HOST || 'localhost',
   dialect: 'postgres',
   port: Number(process.env.PG_PORT),
   password: process.env.PG_PASSWORD,

@@ -20,6 +20,10 @@ export const checkAuth = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).send({ message: "Please fill all fields" });
+    }
+    
     let user = await User.findOne({
       attributes: ['user_id', 'username', 'email'],
       where: {
@@ -73,6 +77,10 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).send({ message: "Please fill all fields" });
+    }
+
     let existUser = await User.findOne({ email: email });
     if (existUser)
     {

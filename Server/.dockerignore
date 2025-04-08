@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+!${ENV_FILE}   # This lets you copy in only the one you want using build args
+*.log
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
